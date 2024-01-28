@@ -23,6 +23,8 @@ class Proceeding extends Model
         'exp_juzgado',
         'abo_id',
         'multiple'
+        ,
+        'type_id'
     ];
 
     protected $dates = ['deleted_at'];
