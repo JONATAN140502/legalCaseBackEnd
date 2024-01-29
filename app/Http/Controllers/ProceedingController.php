@@ -598,4 +598,22 @@ class ProceedingController extends Controller
         }
         return \response()->json(['state' => 1, 'data' => 'Persona no Encontrada'], 200);
     }
+    public function deletelist(){
+
+        $proceedings = \App\Models\Proceeding::orderBy('created_at', 'DESC')
+           ->select(['exp_id','exp_numero'])
+            ->get();
+       return \response()->json(['state' => 0, 'data' =>$proceedings], 200);
+    }
+    public function destroy(Request $request){
+        try {
+            DB::beginTransaction();
+            $exp = \App\Models\Proceeding::where('exp_id', $request->exp_id)->delete();
+            DB::commit();
+            return \response()->json(['state' => 0],200);
+        } catch (Exception $e) {
+            DB::rollback();
+            return ['state' => '1', 'exception' => (string) $e];
+        }
+    }
 }

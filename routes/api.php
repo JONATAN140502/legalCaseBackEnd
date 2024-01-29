@@ -54,6 +54,8 @@ Route::middleware(['auth:api'])->group(function () {
         Route::post('/buscarPorId', 'App\Http\Controllers\ProceedingController@buscarPorId')->name('proceeding.buscarPorId');
         Route::post('/filterprocesal', 'App\Http\Controllers\ProceedingController@filterprocesal')->name('proceeding.filterprocesal');  
         Route::post('/archivados', [ProceedingController::class, 'archivados'])->name('proceeding.archivados');
+        Route::post('/destroy', [ProceedingController::class, 'destroy'])->name('proceeding.destroy');
+        Route::get('/delete/list', 'App\Http\Controllers\ProceedingController@deletelist')->name('proceeding.deletelist');  
     });
 
     //  Distritos Judiciales
@@ -70,7 +72,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('/show', [InstanceController::class, 'show'])->name('Instance.show');
         Route::post('/store', [InstanceController::class, 'store'])->name('Instance.store');
         Route::put('/update', [InstanceController::class, 'update'])->name('Instance.update');
-        Route::delete('/destroy', [InstanceController::class, 'destroy'])->name('Instance.destroy');
+        Route::delete('/destroy/{id}', [InstanceController::class, 'destroy'])->name('Instance.destroy');
     });
     //especialidades
     Route::prefix('specialty')->group(function () {
