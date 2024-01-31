@@ -149,21 +149,33 @@ class ProceedingController extends Controller
             } else {
                 $multiple = 1;
             }
-
+            $exp_numero = isset($request->exp['exp_numero']) ? strtoupper(trim($request->exp['exp_numero'])) : null;
+            $exp_fecha_inicio = isset($request->exp['exp_fecha_inicio']) ? $request->exp['exp_fecha_inicio'] : null;
+            $exp_pretencion = isset($request->exp['exp_pretencion']) ? strtoupper(trim($request->exp['exp_pretencion'])) : null;
+            $exp_materia = isset($request->exp['exp_materia']) ? strtoupper(trim($request->exp['exp_materia'])) : null;
+            $exp_distrito_judicial = isset($request->exp['exp_distrito_judicial']) ? strtoupper(trim($request->exp['exp_distrito_judicial'])) : null;
+            $exp_instancia = isset($request->exp['exp_instancia']) ? strtoupper(trim($request->exp['exp_instancia'])) : null;
+            $exp_especialidad = isset($request->exp['exp_especialidad']) ? trim($request->exp['exp_especialidad']) : null;
+            $exp_monto_pretencion = isset($request->exp['exp_monto_pretencion']) ? trim($request->exp['exp_monto_pretencion']) : null;
+            $exp_estado_proceso = isset($request->exp['exp_estado_proceso']) ? trim($request->exp['exp_estado_proceso']) : null;
+            $exp_juzgado = isset($request->exp['exp_juzgado']) ? strtoupper(trim($request->exp['exp_juzgado'])) : null;
+            
             $exp = \App\Models\Proceeding::create([
-                'exp_numero' => strtoupper(trim($request->exp['exp_numero'])),
-                'exp_fecha_inicio' => $request->exp['exp_fecha_inicio'],
-                'exp_pretencion' => strtoupper(trim($request->exp['exp_pretencion'])),
-                'exp_materia' => strtoupper(trim($request->exp['exp_materia'])),
-                'exp_dis_judicial' => strtoupper(trim($request->exp['exp_distrito_judicial'])),
-                'exp_instancia' => strtoupper(trim($request->exp['exp_instancia'])),
-                'exp_especialidad' => trim($request->exp['exp_especialidad']),
-                'exp_monto_pretencion' => trim($request->exp['exp_monto_pretencion']),
-                'exp_estado_proceso' => trim($request->exp['exp_estado_proceso']),
-                'exp_juzgado' => strtoupper(trim($request->exp['exp_juzgado'])),
+                'exp_numero' => $exp_numero,
+                'exp_fecha_inicio' => $exp_fecha_inicio,
+                'exp_pretencion' => $exp_pretencion,
+                'exp_materia' => $exp_materia,
+                'exp_dis_judicial' => $exp_distrito_judicial,
+                'exp_instancia' => $exp_instancia,
+                'exp_especialidad' => $exp_especialidad,
+                'exp_monto_pretencion' => $exp_monto_pretencion,
+                'exp_estado_proceso' => $exp_estado_proceso,
+                'exp_juzgado' => $exp_juzgado,
                 'multiple' => $multiple,
-                'abo_id' => $request->abo_id
+                'abo_id' => $request->abo_id,
+                'type_id' => $request->tipo
             ]);
+            
             // actualizar o crear costos
             if (
                 $request->exp['exp_estado_proceso'] == 'EN EJECUCION' ||
