@@ -51,7 +51,7 @@ class Audience extends Model
             return [
                 'au_fecha' => $fechaAudiencia->toDateString(),
                 'au_hora' => $audiencia->au_hora,
-                'fecha' => $audiencia->au_fecha->format('d-m-Y'),
+                'fecha' =>  $fechaAudiencia->format('d-m-Y'),
                 'au_lugar' => $audiencia->au_lugar,
                 'au_detalles' => $audiencia->au_detalles,
                 'porcentaje' => $porcentaje,

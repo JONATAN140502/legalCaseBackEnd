@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Audience;
 use Exception;
 use DateTime;
+use Carbon\Carbon;
 
 class AudienceController extends Controller
 {
@@ -21,13 +22,16 @@ class AudienceController extends Controller
 
     protected function index()
     {
-        $audiencias = Audience::with('exp', 'person')->get();
-
+        $hoy = date('Y-m-d');
+        $audiencias = Audience::with('exp', 'person')
+        ->where('au_fecha','>=',$hoy)
+        ->get();
+       
         $result = $audiencias->map(function ($audiencia) {
-
+            $fechaAudiencia = Carbon::parse($audiencia->au_fecha);
             $response = [
                 'aud_id' => $audiencia->au_id,
-                'aud_fecha' => $audiencia->au_fecha->format('d-m-Y'),
+                'aud_fecha' => $fechaAudiencia->format('d-m-Y'),
                 'aud_hora' => $audiencia->au_hora,
                 'aud_lugar' => $audiencia->au_lugar,
                 'aud_detalles' => $audiencia->au_detalles,

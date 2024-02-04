@@ -27,6 +27,7 @@ class MailController extends Controller
                 $alertasAbogado = $expediente->alertas()
                     ->whereDate('ale_fecha_vencimiento', '>=', $today)
                     ->get();
+
                 $i=1;
                 foreach ($alertasAbogado as $alerta) {
                     $fechaVencimiento = Carbon::parse($alerta->ale_fecha_vencimiento);
@@ -41,7 +42,7 @@ class MailController extends Controller
                         $asunto = 'Recordatorio de Alerta:';
                         $descripcion1 = 'Hola, te recordamos que tienes una alerta del Expediente ' . $expediente->exp_numero ;
                         $descripcion2 = 'Con detalle: ' . $alerta->ale_descripcion ;
-                        $descripcion3 = 'Con fecha de vencimiento: ' . $alerta->ale_fecha_vencimiento->format('d-m-Y');
+                        $descripcion3 = 'Con fecha de vencimiento: ' . $fechaVencimiento->format('d-m-Y');
                         
                         $destino = $expediente->abogado->persona->nat_correo;
                         $correo = new envio($nombre, $asunto, $descripcion1,$descripcion2,$descripcion3);
@@ -73,7 +74,7 @@ class MailController extends Controller
                             $descripcion1 = 'Hola, te recordamos que tienes una audiencia del Expediente :' . $expediente->exp_numero.',
                              a realizarse en:'.$audiencia->au_lugar;
                             $descripcion2 = 'Con detalle: ' . $audiencia->au_detalles;
-                            $descripcion3 = 'El dia : ' . $audiencia->au_fecha->format('d-m-Y').'
+                            $descripcion3 = 'El dia : ' . $fechaAudiencia->format('d-m-Y').'
                              a horas:'.$audiencia->au_hora;
                             $destino = $expediente->abogado->persona->nat_correo;
                             $correo = new envio($nombre, $asunto, $descripcion1,$descripcion2,$descripcion3);
@@ -117,7 +118,7 @@ class MailController extends Controller
                 $i++;
             }  
         \DB::commit();
-         return response()->json(['state' =>0 ,'data'=>'OK'], 200);
+         return response()->json(['state' =>0 ,'data'=>$expedientes], 200);
         } catch (\Exception $e) {
             return response()->json(['state' => 1, 'exception' => (string)$e], 500);
         }

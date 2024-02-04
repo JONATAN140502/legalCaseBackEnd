@@ -58,7 +58,7 @@ class Proceeding extends Model
     }
     public function audiencias()
     {
-        return $this->hasMany(Audience::class, 'au_id');
+        return $this->hasMany(Audience::class, 'exp_id');
     }
     public function alertas()
     {
