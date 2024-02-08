@@ -201,4 +201,10 @@ Route::middleware(['auth:api'])->group(function () {
     Route::prefix('mail')->group(function () {
         Route::post('/', 'App\Http\Controllers\MailController@mail')->name('mail.mail');
     });
+
+    //GESTION ADMINISTRATIVA
+    //areas
+    Route::prefix('area')->group(function () {
+        Route::get('/', 'App\Http\Controllers\AreaController@index')->name('area.index');
+    });
 });
