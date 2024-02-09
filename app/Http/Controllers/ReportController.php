@@ -18,9 +18,7 @@ class ReportController extends Controller
     }
     protected function inicio(Request $request)
     {
-        $expTotal = \App\Models\Proceeding::whereIn(
-            'exp_estado_proceso',
-            ['EN TRAMITE', 'EN EJECUCION']
+        $expTotal = \App\Models\Proceeding::whereIn('exp_estado_proceso',['EN TRAMITE','EN EJECUCION']
         )->count();
         
         $expTotalEnTramite = \App\Models\Proceeding::where(
