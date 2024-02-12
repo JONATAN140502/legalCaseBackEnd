@@ -207,4 +207,21 @@ Route::middleware(['auth:api'])->group(function () {
     Route::prefix('area')->group(function () {
         Route::get('/', 'App\Http\Controllers\AreaController@index')->name('area.index');
     });
+
+    //Oficio
+    Route::prefix('trade')->group(function () {
+        Route::get('/', 'App\Http\Controllers\TradeController@index')->name('trade.index');
+        Route::post('/create', 'App\Http\Controllers\TradeController@create')->name('trade.create');
+    });
+
+    //GESTION ADMINISTRATIVA
+    //areas
+    Route::prefix('assistant')->group(function () {
+        Route::get('/', 'App\Http\Controllers\AssistantController@index')->name('assistant.index');
+    });
+
+    //Clientes
+    Route::prefix('person')->group(function () {
+        Route::get('/', 'App\Http\Controllers\PersonController@indexPersons')->name('person.index');
+    });
 });

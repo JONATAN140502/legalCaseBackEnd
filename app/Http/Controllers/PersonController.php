@@ -56,6 +56,16 @@ class PersonController extends Controller
         return response()->json(['data' => $data], 200);
     }
 
+    //Traer Demandados, demandantes y nuevos clientes para el oficio
+    protected function indexPersons(){
+        $tiposProcesalesPermitidos = ['DEMANDADO', 'DEMANDANTE', 'CLIENTE'];
+
+        $data = Person::orderBy('updated_at', 'DESC')
+            ->whereIn('tipo_procesal', $tiposProcesalesPermitidos)
+            ->get();
+        return response()->json(['data' => $data], 200);
+    }
+
     protected function traerExpedientes(Request $request)
     {
         try {
