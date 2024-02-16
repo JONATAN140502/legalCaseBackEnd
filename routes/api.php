@@ -201,4 +201,8 @@ Route::middleware(['auth:api'])->group(function () {
     Route::prefix('mail')->group(function () {
         Route::post('/', 'App\Http\Controllers\MailController@mail')->name('mail.mail');
     });
+
+    // routes/web.php
+    Route::get('/api/oficios', 'TradeController@index');
+
 });
