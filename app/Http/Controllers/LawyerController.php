@@ -228,6 +228,7 @@ class LawyerController extends Controller
     protected function expedientes(Request $request)
     {
         $procedings = \App\Models\Proceeding::orderBy('created_at', 'DESC')
+            ->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])
             ->where('abo_id', $request->abo_id)
             ->with('procesal.persona', 'pretension', 'materia')
             ->get();
