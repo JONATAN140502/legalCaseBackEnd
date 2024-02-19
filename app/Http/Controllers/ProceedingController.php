@@ -298,6 +298,12 @@ class ProceedingController extends Controller
             $abogado->abo_disponibilidad = 'OCUPADO';
             $abogado->abo_carga_laboral = $abogado->abo_carga_laboral + 1;
             $abogado->save();
+            \App\Models\Audit::create([
+                'accion'=>'Registro de Expediente',
+               'model'=>'\App\Models\Proceeding',
+                'model_id'=>$exp->exp_id,
+                'user_id'=>\Auth::user()->id,
+            ]);
             DB::commit();
             return \response()->json(['state' => 0, 'data' => $exp], 200);
         } catch (Exception $e) {
@@ -392,6 +398,12 @@ class ProceedingController extends Controller
                     ]
                 );
             }
+            \App\Models\Audit::create([
+                'accion'=>'Edición de Expediente',
+               'model'=>'\App\Models\Proceeding',
+                'model_id'=>$exp->exp_id,
+                'user_id'=>\Auth::user()->id,
+            ]);
             DB::commit();
             return \response()->json(['state' => 0, 'data' => 'OK'], 200);
         } catch (Exception $e) {
@@ -621,6 +633,12 @@ class ProceedingController extends Controller
         try {
             DB::beginTransaction();
             $exp = \App\Models\Proceeding::where('exp_id', $request->exp_id)->delete();
+            \App\Models\Audit::create([
+                'accion'=>'Eliminacion de Expediente',
+               'model'=>'\App\Models\Proceeding',
+                'model_id'=>$exp->exp_id,
+                'user_id'=>\Auth::user()->id,
+            ]);
             DB::commit();
             return \response()->json(['state' => 0],200);
         } catch (Exception $e) {

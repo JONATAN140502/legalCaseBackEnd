@@ -11,7 +11,7 @@ use App\Http\Controllers\LawyerController;
 
 Route::prefix('/user')->group(function () {
     Route::post('/login', 'App\Http\Controllers\LoginController@login');
-    Route::post('/logout', 'App\Http\Controllers\LoginController@salir');
+  
 });
 Route::middleware(['auth:api'])->group(function () {
     // Departamentos
@@ -94,6 +94,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('/pagos/{doc}', 'App\Http\Controllers\PersonController@getPaymentsByDocument')->name('demandante.getpaymentsbydocument');
 
         Route::post('/updateDni', 'App\Http\Controllers\PersonController@updateDni')->name('demandante.updateDni');
+        Route::post('/logout', 'App\Http\Controllers\PersonController@salir')->name('demandante.salir');
     });
     Route::prefix('demandado')->group(function () {
         Route::get('/', 'App\Http\Controllers\PersonController@indexdemandados')->name('demandado.indexdemandados');
@@ -118,6 +119,7 @@ Route::middleware(['auth:api'])->group(function () {
     // Generacion de Reportes
     Route::prefix('reportes')->group(function () {
         Route::post('/inicio', 'App\Http\Controllers\ReportController@inicio')->name('reportes.inicio');
+        Route::post('/inicioadmin', 'App\Http\Controllers\ReportController@inicioAdmin')->name('reportes.inicioAdmin');
         Route::post('/exprecientes', 'App\Http\Controllers\ReportController@exprecientes')->name('reportes.exprecientes');
         Route::post('/distritos', 'App\Http\Controllers\ReportController@distritos')->name('reportes.distritos');
     });

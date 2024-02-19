@@ -9,6 +9,7 @@ use App\Models\History;
 use App\Models\Proceeding;
 use App\Models\Procesal;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB; // Add this line to import DB
 
 class PersonController extends Controller
@@ -404,4 +405,22 @@ class PersonController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+    public function salir(Request $request)
+    {
+        try {
+            \App\Models\Audit::create([
+                'accion'=>'Salio del Sistema',
+                 'model'=>'\App\Models\User',
+                 'model_id'=>Auth::user()->id,
+                'user_id'=>Auth::user()->id,
+                 ]);
+            if (Auth::check()) {
+                Auth::user()->token()->revoke();
+            }
+     return \response()->json(['state'=>0,'message'=>'cierre  de sesión correctamente'],200);
+    
+    } catch (Exception $e) {
+        return ['state' => '1', 'exception' => (string) $e];
+    }
+}
 }

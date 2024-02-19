@@ -40,6 +40,18 @@ class ReportController extends Controller
             'demandante' => $demandantes, 'expejecucion' => $expTotalEnEjecucion
         ], 200);
     }
+    protected function inicioAdmin(Request $request)
+    {
+        $exp = \App\Models\Audit::orderBy('created_at', 'DESC')
+            ->with('user')
+            ->take(10)
+            ->get();
+
+        return response()->json([
+            'state' => 0, 'data' => $exp
+        ], 200);
+    }
+
 
     protected function exprecientes(Request $request)
     {
@@ -145,6 +157,7 @@ class ReportController extends Controller
             'rep_tipo' => 'REPORTE ABOGADO/AUTOMATIZADO',
             'usu_id' => $request->usu_id,
         ]);
+
         $abogados = \App\Models\Lawyer::orderBy('created_at', 'DESC')->with('persona')->get();
         $pdf = PDF::loadView('vista_pdf_abo', ['data' => $abogados]);
         return $pdf->download('archivo.pdf');
@@ -156,6 +169,13 @@ class ReportController extends Controller
             'rep_fecha_generacion' => now()->setTimezone('America/Lima'),
             'rep_tipo' => 'REPORTE EXPEDIENTE EN TRAMITE/AUTOMATIZADO',
             'usu_id' => $request->usu_id,
+        ]);
+
+        \App\Models\Audit::create([
+            'accion'=>'GERENACION DE REPORTE',
+           'model'=>'\App\Models\Report',
+            'model_id'=>$report->rep_id,
+            'user_id'=>\Auth::user()->id,
         ]);
             $proceedings = \App\Models\Proceeding::orderBy('created_at', 'DESC')
             ->where('exp_estado_proceso','EN TRAMITE')
@@ -200,6 +220,12 @@ class ReportController extends Controller
             'rep_tipo' => 'REPORTE EXPEDIENTE EN TRAMITE/AUTOMATIZADO',
             'usu_id' => $request->usu_id,
         ]);
+        \App\Models\Audit::create([
+            'accion'=>'GERENACION DE REPORTE',
+           'model'=>'\App\Models\Report',
+            'model_id'=>$report->rep_id,
+            'user_id'=>\Auth::user()->id,
+        ]);
             $proceedings = \App\Models\Proceeding::orderBy('created_at', 'DESC')
             ->where('exp_estado_proceso','EN EJECUCION')
             ->with('procesal.persona', 'pretension', 'materia','specialty')
@@ -242,6 +268,12 @@ class ReportController extends Controller
             'rep_tipo' => 'REPORTE EXPEDIENTE EN TRAMITE/AUTOMATIZADO',
             'usu_id' => $request->usu_id,
             ]);
+            \App\Models\Audit::create([
+                'accion'=>'GERENACION DE REPORTE',
+               'model'=>'\App\Models\Report',
+                'model_id'=>$report->rep_id,
+                'user_id'=>\Auth::user()->id,
+            ]);
             $proceedings = \App\Models\Proceeding::orderBy('created_at', 'DESC')
             ->with('procesal.persona', 'pretension', 'materia','specialty')
             ->get();
@@ -277,6 +309,7 @@ class ReportController extends Controller
     protected function pdfdemandantes(Request $request)
     {
 
+
     }
     protected function pdffechaaño(Request $request)
 
@@ -285,6 +318,12 @@ class ReportController extends Controller
             'rep_fecha_generacion' => now()->setTimezone('America/Lima'),
             'rep_tipo' => 'REPORTE EXPEDIENTE  MES Y AÑO /PERSONALIZADO',
             'usu_id' => $request->usu_id,
+        ]);
+        \App\Models\Audit::create([
+            'accion'=>'GERENACION DE REPORTE',
+           'model'=>'\App\Models\Report',
+            'model_id'=>$report->rep_id,
+            'user_id'=>\Auth::user()->id,
         ]);
         $mes = $request->mes;
         $año = $request->año;
@@ -337,6 +376,12 @@ class ReportController extends Controller
             'rep_tipo' => 'REPORTE EXPEDIENTE  MATERIA /PERSONALIZADO',
             'usu_id' => $request->usu_id,
         ]);
+        \App\Models\Audit::create([
+            'accion'=>'GERENACION DE REPORTE',
+           'model'=>'\App\Models\Report',
+            'model_id'=>$report->rep_id,
+            'user_id'=>\Auth::user()->id,
+        ]);
             $proceedings = \App\Models\Proceeding::orderBy('created_at', 'DESC')
             ->where('exp_materia', $request->exp_materia)
             ->with('procesal.persona', 'pretension', 'materia','specialty')
@@ -378,6 +423,12 @@ class ReportController extends Controller
             'rep_fecha_generacion' => now()->setTimezone('America/Lima'),
             'rep_tipo' => 'REPORTE EXPEDIENTE  ABOGADO /PERSONALIZADO',
             'usu_id' => $request->usu_id,
+        ]);
+        \App\Models\Audit::create([
+            'accion'=>'GERENACION DE REPORTE',
+           'model'=>'\App\Models\Report',
+            'model_id'=>$report->rep_id,
+            'user_id'=>\Auth::user()->id,
         ]);
             $abogado=
              \App\Models\Lawyer::where('abo_id',$request->abo_id)
@@ -424,6 +475,12 @@ class ReportController extends Controller
             'rep_fecha_generacion' => now()->setTimezone('America/Lima'),
             'rep_tipo' => 'REPORTE EXPEDIENTE  PRETENCIONES /AUTOMATIZADO',
             'usu_id' => $request->usu_id,
+        ]);
+        \App\Models\Audit::create([
+            'accion'=>'GERENACION DE REPORTE',
+           'model'=>'\App\Models\Report',
+            'model_id'=>$report->rep_id,
+            'user_id'=>\Auth::user()->id,
         ]);
      
             $montos=null;
@@ -473,6 +530,12 @@ class ReportController extends Controller
             'rep_tipo' => 'REPORTE EXPEDIENTE  EJECUCIONES /AUTOMATIZADO',
             'usu_id' => $request->usu_id,
         ]);
+        \App\Models\Audit::create([
+            'accion'=>'GERENACION DE REPORTE',
+           'model'=>'\App\Models\Report',
+            'model_id'=>$report->rep_id,
+            'user_id'=>\Auth::user()->id,
+        ]);
         $montos=null;
             $proceedings = \App\Models\Proceeding::orderBy('created_at', 'DESC')
             ->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])
@@ -521,6 +584,12 @@ class ReportController extends Controller
             'rep_tipo' => 'REPORTE EXPEDIENTE  PRETENSION /PERSONALIZADO',
             'usu_id' => $request->usu_id,
         ]);
+        \App\Models\Audit::create([
+            'accion'=>'GERENACION DE REPORTE',
+           'model'=>'\App\Models\Report',
+            'model_id'=>$report->rep_id,
+            'user_id'=>\Auth::user()->id,
+        ]);
             $proceedings = \App\Models\Proceeding::orderBy('created_at', 'DESC')
             ->where('exp_pretencion', $request->exp_pretension)
             ->with('procesal.persona', 'pretension', 'materia','specialty')
@@ -563,6 +632,12 @@ class ReportController extends Controller
             'rep_fecha_generacion' => now()->setTimezone('America/Lima'),
             'rep_tipo' => 'REPORTE EXPEDIENTE  DESDE-HASTA/PERSONALIZADO',
             'usu_id' => $request->usu_id,
+        ]);
+        \App\Models\Audit::create([
+            'accion'=>'GERENACION DE REPORTE',
+           'model'=>'\App\Models\Report',
+            'model_id'=>$report->rep_id,
+            'user_id'=>\Auth::user()->id,
         ]);
             $proceedings = \App\Models\Proceeding::orderBy('created_at', 'DESC')
             ->whereBetween('exp_fecha_inicio', [$request->fechaDesde,$request->fechaHasta])

@@ -96,7 +96,12 @@ class AudienceController extends Controller
                 'per_id'=>$request->per_id
             ]);
 
-
+            \App\Models\Audit::create([
+                'accion'=>'Registro de Audiencia',
+               'model'=>'\App\Models\Audience',
+                'model_id'=>$audience->au_id,
+                'user_id'=>\Auth::user()->id,
+            ]);
             DB::commit();
 
             return response()->json(['state' => 0, 'data' => $audience], 201);
