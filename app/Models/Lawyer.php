@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+
 class Lawyer extends Model
 {
     use HasFactory,SoftDeletes;
@@ -21,4 +22,9 @@ class Lawyer extends Model
     {
         return $this->belongsTo(Person::class, 'per_id', 'per_id');
     }
+
+    public function trades(){
+        return $this->hasMany(Trade::class, 'tra_abo_id', 'abo_id');
+    }
+
 }

@@ -33,4 +33,17 @@ class AssistantController extends Controller
         return \response()->json(['data' => $data], 200);
         
     }
+
+    public function listTrades(Request $request){
+        try{
+            $assistant = Assistant::findOrFail($request->ass_id);
+            $trades = $assistant->trades()->with('area')->get();
+            return response()->json(['state' => 'success', 'data' => $trades], 200);
+        } catch (QueryException $e) {
+            $errorMessage = $e->getMessage();
+            return response()->json(['state' => 'error', 'message' => 'Error de base de datos: ' . $errorMessage], 500);
+        } catch (\Exception $e) {
+            return response()->json(['state' => 'error', 'message' => 'Error inesperado: ' . $e->getMessage()], 500);
+        }
+    }
 }

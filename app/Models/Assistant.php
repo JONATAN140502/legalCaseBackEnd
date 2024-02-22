@@ -21,4 +21,8 @@ class Assistant extends Model
     {
         return $this->belongsTo(Person::class, 'per_id', 'per_id');
     }
+
+    public function trades(){
+        return $this->hasMany(Trade::class, 'tra_ass_id', 'ass_id');
+    }
 }
