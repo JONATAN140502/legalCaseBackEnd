@@ -8,6 +8,7 @@ use App\Http\Controllers\InstanceController;
 use App\Http\Controllers\JudicialDistrictController;
 use App\Http\Controllers\ProceedingController;
 use App\Http\Controllers\LawyerController;
+use App\Http\Controllers\AssistantController;
 
 Route::prefix('/user')->group(function () {
     Route::post('/login', 'App\Http\Controllers\LoginController@login');
@@ -25,10 +26,12 @@ Route::middleware(['auth:api'])->group(function () {
     // Abogados
     Route::prefix('lawyer')->group(function () {
         Route::get('/', [LawyerController::class, 'index'])->name('lawyer.index');
+        Route::post('/listTrades', [LawyerController::class, 'listTrades'])->name('lawyer.trades');
         Route::post('/show', [LawyerController::class, 'show'])->name('lawyer.show');
         Route::post('/store', [LawyerController::class, 'store'])->name('lawyer.store');
         Route::post('/update', [LawyerController::class, 'update'])->name('lawyer.update');
         Route::post('/delete/{id}', [LawyerController::class, 'destroy'])->name('lawyer.destroy');
+
 
         // Audiencias por abogado
         Route::post('/audiencias', [LawyerController::class, 'audiencias'])->name('lawyer.audiencias');
@@ -211,6 +214,7 @@ Route::middleware(['auth:api'])->group(function () {
     //Oficio
     Route::prefix('trade')->group(function () {
         Route::get('/', 'App\Http\Controllers\TradeController@index')->name('trade.index');
+        Route::get('/{id}', 'App\Http\Controllers\TradeController@show')->name('trade.show');
         Route::post('/create', 'App\Http\Controllers\TradeController@create')->name('trade.create');
     });
 
@@ -218,6 +222,7 @@ Route::middleware(['auth:api'])->group(function () {
     //areas
     Route::prefix('assistant')->group(function () {
         Route::get('/', 'App\Http\Controllers\AssistantController@index')->name('assistant.index');
+        Route::post('/listTrades', [AssistantController::class, 'listTrades'])->name('assistant.trades');
     });
 
     //Clientes

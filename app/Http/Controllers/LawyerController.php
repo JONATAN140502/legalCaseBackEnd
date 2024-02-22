@@ -90,6 +90,22 @@ class LawyerController extends Controller
     //         return ['state' => '1', 'exception' => (string) $e];
     //     }
     // }
+
+
+    public function listTrades(Request $request){
+        try{
+            $lawyer = Lawyer::findOrFail($request->abo_id);
+            $trades = $lawyer->trades()->with('area')->get();
+            return response()->json(['state' => 'success', 'data' => $trades], 200);
+        } catch (QueryException $e) {
+            $errorMessage = $e->getMessage();
+            return response()->json(['state' => 'error', 'message' => 'Error de base de datos: ' . $errorMessage], 500);
+        } catch (\Exception $e) {
+            return response()->json(['state' => 'error', 'message' => 'Error inesperado: ' . $e->getMessage()], 500);
+        }
+    }
+
+
     public function store(Request $request)
     {
         try {
