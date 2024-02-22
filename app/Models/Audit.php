@@ -22,4 +22,8 @@ class Audit extends Model
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
+    public function exp()
+    {
+        return $this->belongsTo(Proceeding::class, 'model_id', 'exp_id');
+    }
 }
