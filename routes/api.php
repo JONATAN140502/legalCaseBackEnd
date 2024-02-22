@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ArchivosController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DepartmentController;
@@ -11,7 +12,6 @@ use App\Http\Controllers\LawyerController;
 
 Route::prefix('/user')->group(function () {
     Route::post('/login', 'App\Http\Controllers\LoginController@login');
-  
 });
 Route::middleware(['auth:api'])->group(function () {
     // Departamentos
@@ -52,10 +52,10 @@ Route::middleware(['auth:api'])->group(function () {
         Route::post('/registrarcaso', 'App\Http\Controllers\ProceedingController@registrarcaso')->name('proceeding.registrarcaso');
         Route::post('/listarestado', 'App\Http\Controllers\ProceedingController@listarestado')->name('proceeding.listarestado');
         Route::post('/buscarPorId', 'App\Http\Controllers\ProceedingController@buscarPorId')->name('proceeding.buscarPorId');
-        Route::post('/filterprocesal', 'App\Http\Controllers\ProceedingController@filterprocesal')->name('proceeding.filterprocesal');  
+        Route::post('/filterprocesal', 'App\Http\Controllers\ProceedingController@filterprocesal')->name('proceeding.filterprocesal');
         Route::post('/archivados', [ProceedingController::class, 'archivados'])->name('proceeding.archivados');
         Route::post('/destroy', [ProceedingController::class, 'destroy'])->name('proceeding.destroy');
-        Route::get('/delete/list', 'App\Http\Controllers\ProceedingController@deletelist')->name('proceeding.deletelist');  
+        Route::get('/delete/list', 'App\Http\Controllers\ProceedingController@deletelist')->name('proceeding.deletelist');
     });
 
     //  Distritos Judiciales
@@ -139,7 +139,6 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('/pdffechas', 'App\Http\Controllers\ReportController@pdffechas')->name('reportes.pdffechas');
         Route::get('/pdfdistrito', 'App\Http\Controllers\ReportController@pdfdistrito')->name('reportes.pdfdistrito');
         Route::get('/pdfbarras', 'App\Http\Controllers\ReportController@contarExpedientesPorAnio')->name('reportes.contarExpedientesPorAnio');
-    
     });
 
     // Audiencias
@@ -147,10 +146,12 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('/', 'App\Http\Controllers\AudienceController@index')->name('audiences.index');
         Route::post('/store', 'App\Http\Controllers\AudienceController@store')->name('audiences.store');
     });
-    //guardar archivos
-    Route::prefix('cargar')->group(function () {
-        Route::post('/archivo', 'App\Http\Controllers\ArchivosController@pdfprincipal')->name('cargar.pdfprincipal');
-        Route::post('/archivo/eje', 'App\Http\Controllers\ArchivosController@eje')->name('cargar.eje');
+    
+    // guardar y descargar archivos
+    Route::prefix('archivos')->group(function () {
+        Route::get('/descargar', [ArchivosController::class, 'descargar'])->name('archivos.descargar');
+        Route::post('/guardar', [ArchivosController::class, 'guardar'])->name('archivos.guardar');
+        Route::post('/actualizar/eje', [ArchivosController::class, 'actualizarEje'])->name('archivos.actualizarEje)');
     });
     //llevar excel a la Bd
     Route::prefix('excel')->group(function () {
