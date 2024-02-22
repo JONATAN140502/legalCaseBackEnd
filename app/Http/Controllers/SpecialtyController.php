@@ -24,6 +24,12 @@ class SpecialtyController extends Controller
                 'esp_nombre' =>  strtoupper(trim($request->esp_nombre)),
                 // 'ins_id' =>  strtoupper(trim($request->ins_id)),
             ]);
+            \App\Models\Audit::create([
+                'accion'=>'Crear de Especialidad',
+               'model'=>'\App\Models\Specialty',
+                'model_id'=>$esp->esp_id,
+                'user_id'=>\Auth::user()->id,
+            ]);
             DB::commit();
             return response()->json(['state' => 0, 'data' => $esp], 200);
         } catch (Exception $e) {
@@ -39,6 +45,12 @@ class SpecialtyController extends Controller
             $esp->esp_nombre = strtoupper(trim($request->esp_nombre));
             // $esp->ins_id = strtoupper(trim($request->ins_id));
             $esp->save();
+            \App\Models\Audit::create([
+                'accion'=>'Edición de Especialidad',
+               'model'=>'\App\Models\Specialty',
+                'model_id'=>$esp->esp_id,
+                'user_id'=>\Auth::user()->id,
+            ]);
             DB::commit();
             return \response()->json(['state' => 0], 200);
 
@@ -53,6 +65,12 @@ class SpecialtyController extends Controller
             DB::beginTransaction();
             $esp= \App\Models\Specialty::find($request->esp_id);
             $esp->delete();
+            \App\Models\Audit::create([
+                'accion'=>'Eliminacion de Especialidad',
+               'model'=>'\App\Models\Specialty',
+                'model_id'=>$esp->esp_id,
+                'user_id'=>\Auth::user()->id,
+            ]);
             DB::commit();
             return \response()->json(['state' => 0, 200]);
 

@@ -54,44 +54,6 @@ class LawyerController extends Controller
         return \response()->json(['data' => $data], 200);
     }
 
-    // protected function registrar(Request $request)
-    // {
-    //     try {
-    //         DB::beginTransaction();
-
-    //         $persona = \App\Models\Person::create([
-    //             'nat_dni' => trim($request->nat_dni),
-    //             'nat_apellido_paterno' => strtoupper(trim($request->nat_apellido_paterno)),
-    //             'nat_apellido_materno' => strtoupper(trim($request->nat_apellido_materno)),
-    //             'nat_nombres' => strtoupper(trim($request->nat_nombres)),
-    //             'nat_telefono' => strtoupper(trim($request->nat_telefono)),
-    //             'nat_correo' => trim($request->nat_correo)
-    //         ]);
-
-    //         $user = \App\Models\User::create([
-    //             'name' => strtoupper(trim($request->nat_apellido_paterno . ' '
-    //                 . $request->nat_apellido_materno . ' ' . $request->nat_nombres)),
-    //             'email' => trim($request->nat_correo),
-    //             'usu_rol' => 'ABOGADO',
-    //             'per_id' => $persona->per_id,
-    //             'password' => bcrypt(trim($request->nat_dni)),
-    //         ]);
-    //         $abogado = \App\Models\Lawyer::create([
-    //             'abo_carga_laboral' => 0,
-    //             'abo_disponibilidad' => 'LIBRE',
-    //             'per_id' => $persona->per_id,
-    //         ]);
-
-    //         DB::commit();
-
-    //         return \response()->json(['state' => 0, 'data' => $abogado], 200);
-    //     } catch (Exception $e) {
-    //         DB::rollback();
-    //         return ['state' => '1', 'exception' => (string) $e];
-    //     }
-    // }
-
-
     public function listTrades(Request $request){
         try{
             $lawyer = Lawyer::findOrFail($request->abo_id);
@@ -104,7 +66,6 @@ class LawyerController extends Controller
             return response()->json(['state' => 'error', 'message' => 'Error inesperado: ' . $e->getMessage()], 500);
         }
     }
-
 
     public function store(Request $request)
     {
@@ -244,6 +205,7 @@ class LawyerController extends Controller
     protected function expedientes(Request $request)
     {
         $procedings = \App\Models\Proceeding::orderBy('created_at', 'DESC')
+            ->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])
             ->where('abo_id', $request->abo_id)
             ->with('procesal.persona', 'pretension', 'materia')
             ->get();
@@ -348,36 +310,43 @@ class LawyerController extends Controller
     protected function changeOfLawyer(Request $request)
     {
         try {
-            $expedientesAsociados = $request->input('expedientes', []);
-            $abogadoAnteriorId = $request->input('abogado_actual');
-            $nuevoAbogadoId = $request->input('abogado_nuevo');
+            $i=0;
+            $apellidoPaterno =null;
+            $jur_razon_social=null;
 
-           
-            $abogadoAnterior = Lawyer::findOrFail($abogadoAnteriorId);
-            $nuevoAbogado = Lawyer::findOrFail($nuevoAbogadoId);
-
+            $expedientes = \App\Models\Proceeding::
+            where('type_id',1)
+            ->whereIn('exp_estado_proceso', ['EN TRAMITE','EN EJECUCION'])->get();
+            foreach ($expedientes as $expediente) {
+                $primerProcesal = $expediente->procesal()->orderBy('proc_id')->first();
+                if ($primerProcesal->tipo_persona== 'NATURAL') {
+                    $apellidoPaterno = \App\Models\Person::find($primerProcesal->persona->per_id)->nat_apellido_paterno;
+                } else {
+                    $jur_razon_social = \App\Models\Person::find($primerProcesal->persona->per_id)->jur_razon_social;
+                }
+                $letrasSeleccionadas = $request->letras_selecionadas;
             
-            Proceeding::whereIn('exp_id', $expedientesAsociados)
-                ->where('abo_id', $abogadoAnterior->abo_id)
-                ->update(['abo_id' => $nuevoAbogado->abo_id]);
-
-            // Transferir la carga laboral del abogado anterior al nuevo abogado
-            $cargaLaboralAnterior = $abogadoAnterior->abo_carga_laboral;
-            // Actualizar el abogado anterior
-            $abogadoAnterior->abo_carga_laboral = 0; // Carga laboral se establece a 0
-            $abogadoAnterior->abo_disponibilidad = 'LIBRE'; // Disponibilidad se establece a 'libre'
-            $abogadoAnterior->save();
-
-            // Actualizar el nuevo abogado
-            $nuevoAbogado->abo_carga_laboral += $cargaLaboralAnterior; // Transferir la carga laboral
-            if ($nuevoAbogado->abo_disponibilidad === 'LIBRE') {
-                // Cambiar la disponibilidad solo si está libre
-                $nuevoAbogado->abo_disponibilidad = 'OCUPADO';
+                foreach ($letrasSeleccionadas as $letra) {
+                    if (
+                        ( strtoupper(substr($apellidoPaterno,0, 1)) == strtoupper($letra)) ||
+                        (strtoupper(substr($jur_razon_social,0, 1)) == strtoupper($letra))
+                    ) {
+                        $expediente->abo_id = $request->abogado_asignado;
+                        $expediente->save();
+                        $i++;
+                    }
+                }
             }
-            $nuevoAbogado->save();
-
-
-            return response()->json(['message' => 'Cambio de abogado realizado con éxito.', 'state' => 0], 200);
+            \DB::beginTransaction();
+              \App\Models\Audit::create([
+                'accion'=>'Cambio de abogado a exp. con letra ',
+               'model'=>'\App\Models\Lawyer',
+                'model_id'=>$request->abogado_asignado,
+                'user_id'=>\Auth::user()->id,
+            ]);
+             \DB::commit();
+       
+            return response()->json(['cantidad' =>$i , 'state' => 0], 200);
         } catch (\Exception $e) {
             // Manejar cualquier error
             return response()->json(['error' => $e->getMessage(), 'state' => 1], 500);

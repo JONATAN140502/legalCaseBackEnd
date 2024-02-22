@@ -30,6 +30,15 @@ class SubjectController extends Controller
            $subject = \App\Models\Subject::create([
                 'mat_nombre' => strtoupper(trim($request->mat_nombre)),
             ]);
+           
+            \App\Models\Audit::create([
+              'accion'=>'Registro de Materia',
+             'model'=>'\App\Models\Subject',
+              'model_id'=>$subject->mat_id,
+              'user_id'=>\Auth::user()->id,
+          ]);
+           
+     
             \DB::commit();
             return \response()->json(['state' => 0, 'data' => $subject], 200);
         } catch (Exception $e) {
@@ -44,6 +53,12 @@ class SubjectController extends Controller
             $subject = \App\Models\Subject::find($request->mat_id);
             $subject->mat_nombre = strtoupper(trim($request->mat_nombre));
             $subject->save();
+            \App\Models\Audit::create([
+                'accion'=>'Edición de Materia',
+               'model'=>'\App\Models\Subject',
+                'model_id'=>$subject->mat_id,
+                'user_id'=>\Auth::user()->id,
+            ]);
             \DB::commit();
             return \response()->json(['state' => 0, 'data' => 'actulizado correcto'], 200);
         } catch (Exception $e) {
@@ -59,6 +74,12 @@ class SubjectController extends Controller
 
             $subject = \App\Models\Subject::find($request->mat_id);
             $subject->delete();
+            \App\Models\Audit::create([
+                'accion'=>'Eliminación de Materia',
+               'model'=>'\App\Models\Subject',
+                'model_id'=>$subject->mat_id,
+                'user_id'=>\Auth::user()->id,
+            ]);
             \DB::commit();
 
             return \response()->json(['state'=>0,'data' => 'eliminado'], 200);
