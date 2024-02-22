@@ -22,7 +22,22 @@ class TradeController extends Controller
     public function index()
     {
         try {
-            $trades = Trade::all();
+            $trades = Trade::with([
+                'area',
+                'lawyer.persona',
+                'assistant.persona'
+            ])->when(
+                'tra_type_person',
+                function ($query, $value) {
+                    if ($value === 'ABOGADO') {
+                        $query->where('tra_type_person', 'ABOGADO');
+                    }
+                    elseif ($value === 'ASISTENTE') {
+                        $query->where('tra_type_person', 'ASISTENTE');
+                    }
+                }
+            )->get();
+
             return response()->json(['state' => 'success', 'data' => $trades], 200);
         } catch (QueryException $e) {
             $errorMessage = $e->getMessage();
@@ -98,5 +113,21 @@ class TradeController extends Controller
             DB::rollback();
             return response()->json(['state' => 'error', 'message' => 'Error inesperado: ' . $e->getMessage()], 500);
         }
+    }
+
+    protected function show($id)
+    {
+        try {
+            $trade = Trade::with([
+                'area'])->find($id);
+            $persons = $trade->persons;
+            return response()->json(['state' => 'success', 'trade' => $trade, 'persons'=>$persons], 200);
+        } catch (QueryException $e) {
+            $errorMessage = $e->getMessage();
+            return response()->json(['state' => 'error', 'message' => 'Error de base de datos: ' . $errorMessage], 500);
+        } catch (\Exception $e) {
+            return response()->json(['state' => 'error', 'message' => 'Error inesperado: ' . $e->getMessage()], 500);
+        }
+
     }
 }

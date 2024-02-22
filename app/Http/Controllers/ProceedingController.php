@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Uuid;
+use  Carbon\Carbon;
 
 class ProceedingController extends Controller
 {
@@ -34,6 +35,8 @@ class ProceedingController extends Controller
                 'monto_pretencion' => $proceeding->exp_monto_pretencion,
                 'estado_proceso' => ucwords(strtolower($proceeding->exp_estado_proceso)),
                 'multiple' => $proceeding->multiple,
+                // 'creacion'=>$proceeding->created_at->diffForHumans(),
+                'creacion'=>$proceeding->created_at,
                 'procesal' => $processedProcesals,
             ];
             $formattedData[] = $commonData;
@@ -456,7 +459,24 @@ class ProceedingController extends Controller
             ->orderBy('created_at', 'DESC')->get();
         $dataEscritos = \App\Models\LegalDocument::where('exp_id', $id)->where('doc_tipo', 'ESCRITO')
             ->orderBy('created_at', 'DESC')->get();
-
+            $audit = \App\Models\Audit::where('model', '\App\Models\Proceeding')
+            ->where('model_id', $proceeding->exp_id)
+            ->where('user_id', \Auth::user()->id)
+            ->whereDate('created_at', Carbon::today())
+            ->first();
+    
+        if ($audit) {
+            // Si ya existe una entrada de auditoría, actualiza la acción
+            $audit->update(['accion' => 'Revisó el Expediente']);
+        } else {
+            // Si no existe una entrada de auditoría, crea una nueva
+            \App\Models\Audit::create([
+                'accion' => 'Revisó el Expediente',
+                'model' => '\App\Models\Proceeding',
+                'model_id' => $proceeding->exp_id,
+                'user_id' => \Auth::user()->id,
+            ]);
+        }
         return response()->json([
             'expediente' => $dataGeneral,
             'procesales' => $dataProcesal,
@@ -464,6 +484,7 @@ class ProceedingController extends Controller
             'escritos' => $dataEscritos,
         ], 200);
     }
+    
 
     protected function showupdate($id)
     {

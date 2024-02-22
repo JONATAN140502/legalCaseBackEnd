@@ -43,7 +43,7 @@ class ReportController extends Controller
     protected function inicioAdmin(Request $request)
     {
         $exp = \App\Models\Audit::orderBy('created_at', 'DESC')
-            ->with('user')
+            ->with('user','exp')
             ->take(10)
             ->get();
 
