@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Proceeding;
+use App\Models\Audience;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Uuid;
 use  Carbon\Carbon;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ProceedingController extends Controller
 {
@@ -36,7 +38,7 @@ class ProceedingController extends Controller
                 'estado_proceso' => ucwords(strtolower($proceeding->exp_estado_proceso)),
                 'multiple' => $proceeding->multiple,
                 // 'creacion'=>$proceeding->created_at->diffForHumans(),
-                'creacion'=>$proceeding->created_at,
+                'creacion' => $proceeding->created_at,
                 'procesal' => $processedProcesals,
             ];
             $formattedData[] = $commonData;
@@ -52,7 +54,7 @@ class ProceedingController extends Controller
             ->with('procesal.persona', 'pretension', 'materia')
             ->get();
 
-        $countArchivados = $procedings->count(); 
+        $countArchivados = $procedings->count();
 
         $formattedData = [];
         foreach ($procedings as $proceeding) {
@@ -162,7 +164,7 @@ class ProceedingController extends Controller
             $exp_monto_pretencion = isset($request->exp['exp_monto_pretencion']) ? trim($request->exp['exp_monto_pretencion']) : null;
             $exp_estado_proceso = isset($request->exp['exp_estado_proceso']) ? trim($request->exp['exp_estado_proceso']) : null;
             $exp_juzgado = isset($request->exp['exp_juzgado']) ? strtoupper(trim($request->exp['exp_juzgado'])) : null;
-            
+
             $exp = \App\Models\Proceeding::create([
                 'exp_numero' => $exp_numero,
                 'exp_fecha_inicio' => $exp_fecha_inicio,
@@ -178,7 +180,7 @@ class ProceedingController extends Controller
                 'abo_id' => $request->abo_id,
                 'type_id' => $request->tipo
             ]);
-            
+
             // actualizar o crear costos
             if (
                 $request->exp['exp_estado_proceso'] == 'EN EJECUCION' ||
@@ -302,10 +304,10 @@ class ProceedingController extends Controller
             $abogado->abo_carga_laboral = $abogado->abo_carga_laboral + 1;
             $abogado->save();
             \App\Models\Audit::create([
-                'accion'=>'Registro de Expediente',
-               'model'=>'\App\Models\Proceeding',
-                'model_id'=>$exp->exp_id,
-                'user_id'=>\Auth::user()->id,
+                'accion' => 'Registro de Expediente',
+                'model' => '\App\Models\Proceeding',
+                'model_id' => $exp->exp_id,
+                'user_id' => \Auth::user()->id,
             ]);
             DB::commit();
             return \response()->json(['state' => 0, 'data' => $exp], 200);
@@ -329,7 +331,7 @@ class ProceedingController extends Controller
             $exp->exp_monto_pretencion = trim($request->expediente['exp_monto_pretencion']);
             $exp->exp_juzgado = trim($request->expediente['exp_juzgado']);
             $exp->exp_estado_proceso = trim($request->expediente['exp_estado_proceso']);
-            $exp->multiple= trim($request->expediente['multiple']);
+            $exp->multiple = trim($request->expediente['multiple']);
             $exp->save();
 
             // actualizar o crear costos
@@ -349,7 +351,7 @@ class ProceedingController extends Controller
                 );
             }
             //eliminar procesales 
-            $delete=\App\Models\Procesal::where('exp_id',$request->expediente['exp_id'])->forceDelete();
+            $delete = \App\Models\Procesal::where('exp_id', $request->expediente['exp_id'])->forceDelete();
             $personas = $request->Personas;
             foreach ($personas as $persona) {
                 $person = null;
@@ -357,7 +359,7 @@ class ProceedingController extends Controller
                     // Crear registro para persona natural
                     $person = \App\Models\Person::updateOrcreate(
                         ['nat_dni' => strtoupper(trim($persona['nat_dni']))],
-                        [  
+                        [
                             'nat_apellido_paterno' => strtoupper(trim($persona['nat_apellido_paterno'])),
                             'nat_apellido_materno' => strtoupper(trim($persona['nat_apellido_materno'])),
                             'nat_nombres' => strtoupper(trim($persona['nat_nombres'])),
@@ -370,8 +372,8 @@ class ProceedingController extends Controller
                 } else {
                     $person = \App\Models\Person::updateOrCreate(
                         ['jur_ruc' => strtoupper(trim($persona['jur_ruc']))],
-                        [   
-                            
+                        [
+
                             'jur_razon_social' => strtoupper(trim($persona['jur_razon_social'])),
                             'jur_telefono' => strtoupper(trim($persona['jur_telefono'])),
                             'jur_correo' => trim($persona['jur_correo']),
@@ -383,7 +385,7 @@ class ProceedingController extends Controller
                 }
                 $direccion = null;
                 $direccion = \App\Models\Address::updateOrCreate(
-                    ['per_id'=> $person->per_id],
+                    ['per_id' => $person->per_id],
                     [
                         'dir_calle_av' => trim($persona['dir_calle_av']),
                         'dis_id' => trim($persona['dis_id']),
@@ -402,10 +404,10 @@ class ProceedingController extends Controller
                 );
             }
             \App\Models\Audit::create([
-                'accion'=>'Edición de Expediente',
-               'model'=>'\App\Models\Proceeding',
-                'model_id'=>$exp->exp_id,
-                'user_id'=>\Auth::user()->id,
+                'accion' => 'Edición de Expediente',
+                'model' => '\App\Models\Proceeding',
+                'model_id' => $exp->exp_id,
+                'user_id' => \Auth::user()->id,
             ]);
             DB::commit();
             return \response()->json(['state' => 0, 'data' => 'OK'], 200);
@@ -459,12 +461,12 @@ class ProceedingController extends Controller
             ->orderBy('created_at', 'DESC')->get();
         $dataEscritos = \App\Models\LegalDocument::where('exp_id', $id)->where('doc_tipo', 'ESCRITO')
             ->orderBy('created_at', 'DESC')->get();
-            $audit = \App\Models\Audit::where('model', '\App\Models\Proceeding')
+        $audit = \App\Models\Audit::where('model', '\App\Models\Proceeding')
             ->where('model_id', $proceeding->exp_id)
             ->where('user_id', \Auth::user()->id)
             ->whereDate('created_at', Carbon::today())
             ->first();
-    
+
         if ($audit) {
             // Si ya existe una entrada de auditoría, actualiza la acción
             $audit->update(['accion' => 'Revisó el Expediente']);
@@ -484,7 +486,7 @@ class ProceedingController extends Controller
             'escritos' => $dataEscritos,
         ], 200);
     }
-    
+
 
     protected function showupdate($id)
     {
@@ -643,28 +645,100 @@ class ProceedingController extends Controller
         }
         return \response()->json(['state' => 1, 'data' => 'Persona no Encontrada'], 200);
     }
-    public function deletelist(){
+    public function deletelist()
+    {
 
         $proceedings = \App\Models\Proceeding::orderBy('created_at', 'DESC')
-           ->select(['exp_id','exp_numero'])
+            ->select(['exp_id', 'exp_numero'])
             ->get();
-       return \response()->json(['state' => 0, 'data' =>$proceedings], 200);
+        return \response()->json(['state' => 0, 'data' => $proceedings], 200);
     }
-    public function destroy(Request $request){
+    public function destroy(Request $request)
+    {
         try {
             DB::beginTransaction();
             $exp = \App\Models\Proceeding::where('exp_id', $request->exp_id)->delete();
             \App\Models\Audit::create([
-                'accion'=>'Eliminacion de Expediente',
-               'model'=>'\App\Models\Proceeding',
-                'model_id'=>$exp->exp_id,
-                'user_id'=>\Auth::user()->id,
+                'accion' => 'Eliminacion de Expediente',
+                'model' => '\App\Models\Proceeding',
+                'model_id' => $exp->exp_id,
+                'user_id' => \Auth::user()->id,
             ]);
             DB::commit();
-            return \response()->json(['state' => 0],200);
+            return \response()->json(['state' => 0], 200);
         } catch (Exception $e) {
             DB::rollback();
             return ['state' => '1', 'exception' => (string) $e];
         }
+    }
+
+    protected function audiencias(Request $request)
+    {
+        try {
+            $hoy = date('Y-m-d');
+            //Obtén todas las audiencias asociadas al expediente con el exp_id proporcionado
+            $audiencias = Audience::with('exp', 'person')
+                ->where('exp_id', $request->exp_id)
+                ->where('au_fecha', '>=', $hoy)
+                ->get();
+
+            if ($audiencias->isEmpty()) {
+                throw new ModelNotFoundException('No se encontraron audiencias para el expediente dado');
+            }
+
+            $result = $audiencias->map(function ($audiencia) {
+                $fechaAudiencia = Carbon::parse($audiencia->au_fecha);
+
+                $response = [
+                    'aud_id' => $audiencia->au_id,
+                    'aud_fecha' => $fechaAudiencia->format('d-m-Y'),
+                    'aud_hora' => $audiencia->au_hora,
+                    'aud_lugar' => $audiencia->au_lugar,
+                    'aud_detalles' => $audiencia->au_detalles,
+                    'per_id' => $audiencia->per_id,
+                    'exp_id' => $audiencia->exp->exp_id,
+                    'exp_numero' => $audiencia->exp->exp_numero,
+                    'multiple' => $audiencia->exp->multiple,
+                ];
+
+                if ($audiencia->person->nat_dni) {
+                    // Si la persona es natural
+                    $response += [
+                        'per_id' => $audiencia->person->per_id,
+                        'nat_dni' => $audiencia->person->nat_dni,
+                        'nombre_completo' => $this->nombreCompleto($audiencia),
+                        'nat_telefono' => $audiencia->person->nat_telefono,
+                        'nat_correo' => $audiencia->person->nat_correo,
+                        'tipo_procesal' => $audiencia->person->tipo_procesal,
+                        'tipo_persona' => 'NATURAL',
+                    ];
+                } else {
+                    // Si la persona es jurídica
+                    $response += [
+                        'jur_id' => $audiencia->person->jur_id,
+                        'jur_ruc' => $audiencia->person->jur_ruc,
+                        'jur_razon_social' => $audiencia->person->jur_razon_social,
+                        'tipo_procesal' => $audiencia->person->tipo_procesal,
+                        'tipo_persona' => 'JURIDICA',
+                    ];
+                }
+
+                return $response;
+            });
+
+
+            return response()->json(['data' => $result], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e], 500);
+        }
+    }
+
+    public function nombreCompleto($audiencia)
+    {
+        $apellidoPaterno = ucwords(strtolower($audiencia->person->nat_apellido_paterno));
+        $apellidoMaterno = ucwords(strtolower($audiencia->person->nat_apellido_materno));
+        $nombres = ucwords(strtolower($audiencia->person->nat_nombres));
+
+        return "$nombres $apellidoPaterno $apellidoMaterno";
     }
 }

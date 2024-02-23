@@ -10,6 +10,7 @@ use App\Http\Controllers\JudicialDistrictController;
 use App\Http\Controllers\ProceedingController;
 use App\Http\Controllers\LawyerController;
 use App\Http\Controllers\AssistantController;
+use App\Http\Controllers\AudienceController;
 
 Route::prefix('/user')->group(function () {
     Route::post('/login', 'App\Http\Controllers\LoginController@login');
@@ -59,6 +60,9 @@ Route::middleware(['auth:api'])->group(function () {
         Route::post('/archivados', [ProceedingController::class, 'archivados'])->name('proceeding.archivados');
         Route::post('/destroy', [ProceedingController::class, 'destroy'])->name('proceeding.destroy');
         Route::get('/delete/list', 'App\Http\Controllers\ProceedingController@deletelist')->name('proceeding.deletelist');
+
+        Route::post('/audiencias', [ProceedingController::class, 'audiencias'])->name('proceeding.audiencias');
+
     });
 
     //  Distritos Judiciales
@@ -146,8 +150,8 @@ Route::middleware(['auth:api'])->group(function () {
 
     // Audiencias
     Route::prefix('audiences')->group(function () {
-        Route::get('/', 'App\Http\Controllers\AudienceController@index')->name('audiences.index');
-        Route::post('/store', 'App\Http\Controllers\AudienceController@store')->name('audiences.store');
+        Route::get('/', [AudienceController::class, 'index'])->name('audiences.index');
+        Route::post('/store', [AudienceController::class, 'store'])->name('audiences.store');
     });
     
     // guardar y descargar archivos
@@ -197,7 +201,6 @@ Route::middleware(['auth:api'])->group(function () {
 
     //pretensiones
     Route::prefix('claim')->group(function () {
-        Route::get('/', 'App\Http\Controllers\ClaimController@index')->name('claim.index');
         Route::get('/', 'App\Http\Controllers\ClaimController@index')->name('claim.index');
         Route::post('/show', 'App\Http\Controllers\ClaimController@show')->name('claim.show');
         Route::post('/store', 'App\Http\Controllers\ClaimController@registrar')->name('claim.registrar');

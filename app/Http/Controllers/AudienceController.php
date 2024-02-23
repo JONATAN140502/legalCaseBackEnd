@@ -9,6 +9,8 @@ use App\Models\Audience;
 use Exception;
 use DateTime;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\QueryException;
 
 class AudienceController extends Controller
 {
@@ -24,9 +26,9 @@ class AudienceController extends Controller
     {
         $hoy = date('Y-m-d');
         $audiencias = Audience::with('exp', 'person')
-        ->where('au_fecha','>=',$hoy)
-        ->get();
-       
+            ->where('au_fecha', '>=', $hoy)
+            ->get();
+
         $result = $audiencias->map(function ($audiencia) {
             $fechaAudiencia = Carbon::parse($audiencia->au_fecha);
             $response = [
@@ -69,6 +71,70 @@ class AudienceController extends Controller
         return response()->json(['data' => $result], 200);
     }
 
+    //show
+    protected function show(Request $request)
+    {
+        try {
+            $hoy = date('Y-m-d');
+            //Obtén todas las audiencias asociadas al expediente con el exp_id proporcionado
+            $audiencias = Audience::with('exp', 'person')
+                ->where('exp_id', $request->exp_id)
+                ->where('au_fecha', '>=', $hoy)
+                ->get();
+
+            if ($audiencias->isEmpty()) {
+                throw new ModelNotFoundException('No se encontraron audiencias para el expediente dado');
+            }
+
+            $result = $audiencias->map(function ($audiencia) {
+                $fechaAudiencia = Carbon::parse($audiencia->au_fecha);
+
+                $response = [
+                    'aud_id' => $audiencia->au_id,
+                    'aud_fecha' => $fechaAudiencia->format('d-m-Y'),
+                    'aud_hora' => $audiencia->au_hora,
+                    'aud_lugar' => $audiencia->au_lugar,
+                    'aud_detalles' => $audiencia->au_detalles,
+                    'per_id' => $audiencia->per_id,
+                    'exp_id' => $audiencia->exp->exp_id,
+                    'exp_numero' => $audiencia->exp->exp_numero,
+                ];
+
+                if ($audiencia->person->nat_dni) {
+                    // Si la persona es natural
+                    $response += [
+                        'per_id' => $audiencia->person->per_id,
+                        'nat_dni' => $audiencia->person->nat_dni,
+                        'nat_apellido_paterno' => $audiencia->person->nat_apellido_paterno,
+                        'nat_apellido_materno' => $audiencia->person->nat_apellido_materno,
+                        'nat_nombres' => $audiencia->person->nat_nombres,
+                        'nat_telefono' => $audiencia->person->nat_telefono,
+                        'nat_correo' => $audiencia->person->nat_correo,
+                        'tipo_procesal' => $audiencia->person->tipo_procesal,
+                        'tipo_persona' => 'NATURAL',
+                    ];
+                } else {
+                    // Si la persona es jurídica
+                    $response += [
+                        'jur_id' => $audiencia->person->jur_id,
+                        'jur_ruc' => $audiencia->person->jur_ruc,
+                        'jur_razon_social' => $audiencia->person->jur_razon_social,
+                        'tipo_procesal' => $audiencia->person->tipo_procesal,
+                        'tipo_persona' => 'JURIDICA',
+                    ];
+                }
+
+                return $response;
+            });
+
+
+            return response()->json(['data' => $result], 200);
+        
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e], 500);
+        }
+    }
+    
     protected function store(Request $request)
     {
         try {
@@ -83,24 +149,24 @@ class AudienceController extends Controller
             $interval = $au_fecha_obj->diff($hoy_obj);
             $dias_faltantes = $interval->days;
             //expediente
-            $exp=\App\Models\Proceeding::find($request->exp_id);
+            $exp = \App\Models\Proceeding::find($request->exp_id);
             $audience = Audience::create([
                 'exp_id' => strtoupper(trim($request->exp_id)),
-                'abo_id'=>$exp->abo_id,
+                'abo_id' => $exp->abo_id,
                 'au_fecha' => $au_fecha,
                 'au_link' => $request->au_link,
                 'au_hora' => $request->au_hora,
                 'au_lugar' => $request->au_lugar,
                 'au_detalles' => $request->au_detalles,
                 'au_dias_faltantes' => $dias_faltantes,
-                'per_id'=>$request->per_id
+                'per_id' => $request->per_id
             ]);
 
             \App\Models\Audit::create([
-                'accion'=>'Registro de Audiencia',
-               'model'=>'\App\Models\Audience',
-                'model_id'=>$audience->au_id,
-                'user_id'=>\Auth::user()->id,
+                'accion' => 'Registro de Audiencia',
+                'model' => '\App\Models\Audience',
+                'model_id' => $audience->au_id,
+                'user_id' => \Auth::user()->id,
             ]);
             DB::commit();
 
