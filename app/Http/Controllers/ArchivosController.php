@@ -88,4 +88,7 @@ class ArchivosController extends Controller
             return response()->json(['error' => 'Error al actualizar el archivo: ' . $e->getMessage()], 500);
         }
     }
+    public function FunctionName()  {
+        
+    }
 }
