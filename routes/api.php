@@ -62,7 +62,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('/delete/list', 'App\Http\Controllers\ProceedingController@deletelist')->name('proceeding.deletelist');
 
         Route::post('/audiencias', [ProceedingController::class, 'audiencias'])->name('proceeding.audiencias');
-
+        Route::post('/alertas', [ProceedingController::class, 'alertas'])->name('proceeding.alertas');
     });
 
     //  Distritos Judiciales
@@ -153,7 +153,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('/', [AudienceController::class, 'index'])->name('audiences.index');
         Route::post('/store', [AudienceController::class, 'store'])->name('audiences.store');
     });
-    
+
     // guardar y descargar archivos
     Route::prefix('archivos')->group(function () {
         Route::get('/descargar', [ArchivosController::class, 'descargar'])->name('archivos.descargar');

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Alert;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -18,7 +20,7 @@ class AlertController extends Controller
     protected function index()
     {
         try {
-            $alertas =\App\Models\Alert::obtenerAlertasFaltantes();
+            $alertas = Alert::obtenerAlertasFaltantes();
             return response()->json(['state' => 0, 'data' => $alertas], 200);
         } catch (\Exception $e) {
             return response()->json(['state' => 1, 'error' => $e->getMessage()], 500);
@@ -30,16 +32,16 @@ class AlertController extends Controller
     {
         try {
             DB::beginTransaction();
-    
+
             $fechaVencimiento = $request->ale_fecha_vencimiento;
             $descripcion = $request->ale_descripcion;
             $expId = $request->exp_id;
-    
+
             $auFecha = strtoupper(trim($fechaVencimiento));
             $hoy = date('Y-m-d');
-    
+
             $diasFaltantes = (new DateTime($auFecha))->diff(new DateTime($hoy))->days;
-    
+
             $alert = \App\Models\Alert::create([
                 'ale_fecha_vencimiento' => $fechaVencimiento,
                 'ale_descripcion' => $descripcion,
@@ -47,18 +49,17 @@ class AlertController extends Controller
                 'ale_dias_faltantes' => $diasFaltantes,
             ]);
             \App\Models\Audit::create([
-                'accion'=>'Registro de Tarea',
-               'model'=>'\App\Models\Alert',
-                'model_id'=>$alert->ale_id,
-                'user_id'=>\Auth::user()->id,
+                'accion' => 'Registro de Tarea',
+                'model' => '\App\Models\Alert',
+                'model_id' => $alert->ale_id,
+                'user_id' => \Auth::user()->id,
             ]);
             DB::commit();
-    
+
             return response()->json(['state' => 0, 'data' => $alert], 201);
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json(['state' => 1, 'error' => $e->getMessage()], 500);
         }
     }
-    
 }

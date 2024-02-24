@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Alert;
 use App\Models\Proceeding;
 use App\Models\Audience;
 use Exception;
@@ -740,5 +741,36 @@ class ProceedingController extends Controller
         $nombres = ucwords(strtolower($audiencia->person->nat_nombres));
 
         return "$nombres $apellidoPaterno $apellidoMaterno";
+    }
+
+    protected function alertas(Request $request)
+    {
+        try {
+
+            $today = Carbon::now('America/Lima')->startOfDay();
+
+            $alertas = Alert::whereDate('ale_fecha_vencimiento', '>=', $today)
+                ->where('exp_id', $request->exp_id)
+                ->get();
+
+            $alertasConPorcentaje = $alertas->map(function ($alerta) use ($today) {
+                $fechaVencimiento = Carbon::parse($alerta->ale_fecha_vencimiento);
+                $diasFaltantes = $fechaVencimiento->startOfDay()->diffInDays($today);
+                $porcentaje = round($diasFaltantes / $alerta->ale_dias_faltantes, 2);
+
+                return [
+                    'ale_fecha_vencimiento' => $fechaVencimiento->toDateString(),
+                    'ale_descripcion' => $alerta->ale_descripcion,
+                    'fecha' => $fechaVencimiento->format('d-m-Y'),
+                    'ale_expediente' => $alerta->expediente ? $alerta->expediente->exp_numero : 'N/A',
+                    'ale_porcentaje' => $porcentaje,
+                    'ale_exp_id'  => $alerta->expediente ? $alerta->expediente->exp_id : 'N/A',
+                    'id' => $alerta->ale_id
+                ];
+            });
+            return response()->json(['state' => 0, 'data' => $alertasConPorcentaje], 200);
+        } catch (Exception $e) {
+            return response()->json(['state' => 1, 'error' => $e->getMessage()], 500);
+        }
     }
 }
