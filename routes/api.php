@@ -32,17 +32,13 @@ Route::middleware(['auth:api'])->group(function () {
         Route::post('/store', [LawyerController::class, 'store'])->name('lawyer.store');
         Route::post('/update', [LawyerController::class, 'update'])->name('lawyer.update');
         Route::post('/delete/{id}', [LawyerController::class, 'destroy'])->name('lawyer.destroy');
-
-
         // Audiencias por abogado
         Route::post('/audiencias', [LawyerController::class, 'audiencias'])->name('lawyer.audiencias');
-
         // Alertas por abogado
         Route::post('/alertas', [LawyerController::class, 'alertas'])->name('lawyer.alertas');
-
         // Expedientes por abogado
+        Route::post('/calendario', [LawyerController::class, 'calendario'])->name('lawyer.calendario');
         Route::post('/expedientes', [LawyerController::class, 'expedientes'])->name('lawyer.expedientes');
-
         Route::post('/changeOfLawyer', [LawyerController::class, 'changeOfLawyer'])->name('lawyer.changeOfLawyer');
     });
 

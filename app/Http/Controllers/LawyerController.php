@@ -390,4 +390,9 @@ class LawyerController extends Controller
 
         return $processedProcesals;
     }
+    public function calendario(Request $request){
+        $alertas = \App\Models\Alert::obtenerAlertasFaltantesabo($request->abo_id);
+        $audiences = \App\Models\Audience::obtenerAudienciasFaltantesabo($request->abo_id);
+        return response()->json(['alertas' => $alertas,'audiencias'=>$audiences]);
+     }
 }

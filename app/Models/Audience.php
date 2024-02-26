@@ -63,4 +63,34 @@ class Audience extends Model
 
         return $audienciasConPorcentaje;
     }
+    public static function obtenerAudienciasFaltantesabo($id)
+    {
+        $today = Carbon::now('America/Lima')->startOfDay();
+
+        $audiencias = self::whereDate('au_fecha', '>=', $today)
+            ->whereNotNull('au_hora')
+            ->whereNotNull('au_lugar')
+            ->where('abo_id',$id)
+            ->get();
+
+        $audienciasConPorcentaje = $audiencias->map(function ($audiencia) use ($today) {
+            $fechaAudiencia = Carbon::parse($audiencia->au_fecha);
+            $diasFaltantes = $fechaAudiencia->startOfDay()->diffInDays($today);
+            $porcentaje = round($diasFaltantes / $audiencia->au_dias_faltantes, 2);
+
+            return [
+                'au_fecha' => $fechaAudiencia->toDateString(),
+                'au_hora' => $audiencia->au_hora,
+                'fecha' =>  $fechaAudiencia->format('d-m-Y'),
+                'au_lugar' => $audiencia->au_lugar,
+                'au_detalles' => $audiencia->au_detalles,
+                'porcentaje' => $porcentaje,
+                'exp_id' => $audiencia->exp_id,
+                'exp_numero' => $audiencia->expediente->exp_numero,
+                'id'=>$audiencia->au_id,
+            ];
+        });
+
+        return $audienciasConPorcentaje;
+    }
 }
