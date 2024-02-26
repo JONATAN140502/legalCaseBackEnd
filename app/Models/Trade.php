@@ -15,7 +15,9 @@ class Trade extends Model
     protected $primaryKey = 'tra_id';
     protected $fillable = [
         'tra_number',
+        'tra_name',
         'tra_number_ext',
+        'tra_doc_recep',
         'tra_matter',
         'tra_arrival_date',
         'tra_state_mp',

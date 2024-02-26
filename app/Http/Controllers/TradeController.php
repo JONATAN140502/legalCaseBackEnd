@@ -51,6 +51,8 @@ class TradeController extends Controller
     {        
         try {
             $tra_number = isset($request->tra_number) ? strtoupper(trim($request->tra_number)) : null;
+            $tra_name = isset($request->tra_name) ? ucfirst(trim($request->tra_name)) : null;
+            $tra_doc_recep = isset($request->tra_doc_recep) ? strtoupper(trim($request->tra_doc_recep)) : null;
             $tra_number_ext = isset($request->tra_number_ext) ? strtoupper(trim($request->tra_number_ext)) : null;
             $tra_matter = isset($request->tra_matter) ? ucfirst(trim($request->tra_matter)) : null;
             $tra_arrival_date = isset($request->tra_arrival_date) ? $request->tra_arrival_date : null;
@@ -73,7 +75,9 @@ class TradeController extends Controller
             DB::beginTransaction();
             $trade = Trade::create([
                 'tra_number' => $tra_number,
+                'tra_name' => $tra_name,
                 'tra_number_ext' => $tra_number_ext,
+                'tra_doc_recep' => $tra_doc_recep,
                 'tra_matter' => $tra_matter,
                 'tra_arrival_date' => $tra_arrival_date,
                 'tra_state_mp' => $tra_state_mp,

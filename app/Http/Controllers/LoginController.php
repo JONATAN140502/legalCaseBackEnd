@@ -51,12 +51,14 @@ class LoginController extends Controller
             $abogado = \App\Models\Lawyer::where(
                 'per_id',$personaNatural->per_id)->first();
         }
+        
         \App\Models\Audit::create([
             'accion'=>'Ingreso Al Sistema',
            'model'=>'\App\Models\User',
             'model_id'=>Auth::user()->id,
             'user_id'=>Auth::user()->id,
         ]);
+        
         if($user->usu_rol=='ASISTENTE'){
             $asistente = \App\Models\Assistant::where(
                 'per_id',$personaNatural->per_id)->first();
