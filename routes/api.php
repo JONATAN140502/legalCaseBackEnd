@@ -11,6 +11,7 @@ use App\Http\Controllers\ProceedingController;
 use App\Http\Controllers\LawyerController;
 use App\Http\Controllers\AssistantController;
 use App\Http\Controllers\AudienceController;
+use App\Http\Controllers\ProceedingTypeController;
 
 Route::prefix('/user')->group(function () {
     Route::post('/login', 'App\Http\Controllers\LoginController@login');
@@ -230,5 +231,10 @@ Route::middleware(['auth:api'])->group(function () {
     //Clientes
     Route::prefix('person')->group(function () {
         Route::get('/', 'App\Http\Controllers\PersonController@indexPersons')->name('person.index');
+    });
+
+    //Tipo de expedientes
+    Route::prefix('proceedingTypes')->group(function () {
+        Route::get('/', [ProceedingTypeController::class, 'index'])->name('proceedingTypes.index');
     });
 });

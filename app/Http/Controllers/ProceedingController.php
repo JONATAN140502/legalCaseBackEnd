@@ -23,7 +23,7 @@ class ProceedingController extends Controller
     {
         $procedings = \App\Models\Proceeding::orderBy('created_at', 'DESC')
             ->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])
-            ->with('procesal.persona', 'pretension', 'materia')
+            ->with('procesal.persona', 'pretension', 'materia',)
             ->get();
 
         $formattedData = [];
@@ -38,7 +38,7 @@ class ProceedingController extends Controller
                 'monto_pretencion' => $proceeding->exp_monto_pretencion,
                 'estado_proceso' => ucwords(strtolower($proceeding->exp_estado_proceso)),
                 'multiple' => $proceeding->multiple,
-                // 'creacion'=>$proceeding->created_at->diffForHumans(),
+                'tipo_exp'=>$proceeding->type_id,
                 'creacion' => $proceeding->created_at,
                 'procesal' => $processedProcesals,
             ];

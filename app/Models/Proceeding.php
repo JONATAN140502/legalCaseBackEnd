@@ -22,8 +22,7 @@ class Proceeding extends Model
         'exp_estado_proceso',
         'exp_juzgado',
         'abo_id',
-        'multiple'
-        ,
+        'multiple',
         'type_id'
     ];
 
@@ -71,5 +70,9 @@ class Proceeding extends Model
     public function montos()
     {
         return $this->belongsTo(ExecutionAmount::class, 'exp_id', 'exp_id');
+    }
+
+    public function proceedingTypes(){
+        return $this->belongsTo(ProceedingTypes::class, 'exp_id');
     }
 }
