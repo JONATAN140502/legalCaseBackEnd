@@ -11,6 +11,7 @@ use App\Http\Controllers\ProceedingController;
 use App\Http\Controllers\LawyerController;
 use App\Http\Controllers\AssistantController;
 use App\Http\Controllers\AudienceController;
+use App\Http\Controllers\PersonController;
 use App\Http\Controllers\ProceedingTypeController;
 
 Route::prefix('/user')->group(function () {
@@ -87,9 +88,12 @@ Route::middleware(['auth:api'])->group(function () {
         Route::post('/destroy', 'App\Http\Controllers\SpecialtyController@destroy')->name('specialty.eliminar');
     });
 
+    Route::prefix('personas')->group(function () {
+        Route::get('/', [PersonController::class , 'index'])->name('demandante.index');
+    });
     // Demandantes
     Route::prefix('demandante')->group(function () {
-        Route::post('/', 'App\Http\Controllers\PersonController@index')->name('demandante.index');
+        Route::get('/', [PersonController::class , 'index'])->name('demandante.index');
         Route::get('/detalledemandante/{doc}', 'App\Http\Controllers\PersonController@detalledemandante')->name('demandante.detalledemandante');
         Route::post('/expedientes', 'App\Http\Controllers\PersonController@traerexpedientes')->name('demandante.traerexpedientes');
         // Nuevas rutas para obtener información por documento

@@ -22,25 +22,21 @@ class PersonController extends Controller
         $this->personModel = $personModel;
     }
 
-    protected function index(Request $request)
+    protected function index()
     {
-        $tipoProcesal = $request->input('tipo_procesal');
+        try {
+            $personas = Person::with(['procesal'])
+                ->orderByDesc('updated_at')
+                ->get();
 
-        $data = Person::orderBy('updated_at', 'DESC')
-            ->where('tipo_procesal', $tipoProcesal)
-            ->whereHas('procesal.expediente', function ($query) {
-                $query->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION','ARCHIVADO']);
-            })
-            ->get(['per_id', 'nat_dni', 'nat_apellido_paterno', 'nat_apellido_materno', 'nat_nombres', 'nat_telefono', 'nat_correo', 'jur_ruc', 'jur_razon_social', 'jur_telefono', 'jur_correo', 'jur_rep_legal', 'tipo_procesal', 'per_condicion', 'created_at', 'updated_at', 'deleted_at'])
-            ->map(function ($person) {
-                $person->nat_apellido_paterno = ucfirst(strtolower($person->nat_apellido_paterno));
-                $person->nat_apellido_materno = ucfirst(strtolower($person->nat_apellido_materno));
-                $person->nat_nombres = ucwords(strtolower($person->nat_nombres));
-                $person->jur_razon_social = ucwords(strtolower($person->jur_razon_social));
-                return $person;
-            });
+            if ($personas->isEmpty()) {
+                return response()->json(['message' => 'No se encontraron personas.'], 404);
+            }
 
-        return response()->json(['data' => $data, 'procesal' => $tipoProcesal], 200);
+            return response()->json(['data' => $personas], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Ocurrió un error al procesar la solicitud.'], 500);
+        }
     }
 
     //traer los demandados
@@ -58,7 +54,8 @@ class PersonController extends Controller
     }
 
     //Traer Demandados, demandantes y nuevos clientes para el oficio
-    protected function indexPersons(){
+    protected function indexPersons()
+    {
         $tiposProcesalesPermitidos = ['DEMANDADO', 'DEMANDANTE', 'CLIENTE'];
 
         $data = Person::orderBy('updated_at', 'DESC')
@@ -192,9 +189,9 @@ class PersonController extends Controller
         $tipo_persona = null;
 
         $person = Person::where('per_id', $id)->first();
-        if($person->nat_dni != null){
+        if ($person->nat_dni != null) {
             $tipo_persona = 'NATURAL';
-        }else{
+        } else {
             $tipo_persona = 'JURIDICA';
         }
         // if (strlen($doc) === 8) {
@@ -330,37 +327,37 @@ class PersonController extends Controller
     }
 
     public function updateDni(Request $request)
-{
-    try {
-        DB::beginTransaction();
+    {
+        try {
+            DB::beginTransaction();
 
-        // Validar los datos recibidos
-        $request->validate([
-            'per_id' => 'required|exists:persons,per_id',
-            'newDni' => 'required|numeric|digits:8',
-        ]);
+            // Validar los datos recibidos
+            $request->validate([
+                'per_id' => 'required|exists:persons,per_id',
+                'newDni' => 'required|numeric|digits:8',
+            ]);
 
-        $id = $request->per_id;
-        $persona = Person::where('per_id', $id)->first(); // Use first() instead of get()
+            $id = $request->per_id;
+            $persona = Person::where('per_id', $id)->first(); // Use first() instead of get()
 
-        if (!$persona) {
-            return response()->json(['error' => 'Persona no encontrada'], 404);
+            if (!$persona) {
+                return response()->json(['error' => 'Persona no encontrada'], 404);
+            }
+
+            $persona->nat_dni = $request->newDni;
+            $persona->save();
+
+            DB::commit();
+            return response()->json(['state' => 'success']);
+        } catch (\Illuminate\Validation\ValidationException $validationException) {
+            // Captura los errores de validación
+            $errors = $validationException->errors();
+            return response()->json(['error' => $errors], 422);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['state' => '1', 'exception' => (string) $e]);
         }
-
-        $persona->nat_dni = $request->newDni;
-        $persona->save();
-
-        DB::commit();
-        return response()->json(['state' => 'success']);
-    } catch (\Illuminate\Validation\ValidationException $validationException) {
-        // Captura los errores de validación
-        $errors = $validationException->errors();
-        return response()->json(['error' => $errors], 422);
-    } catch (\Exception $e) {
-        DB::rollback();
-        return response()->json(['state' => '1', 'exception' => (string) $e]);
     }
-}
 
 
     protected function getPersonByDocument($doc)
@@ -409,18 +406,17 @@ class PersonController extends Controller
     {
         try {
             \App\Models\Audit::create([
-                'accion'=>'Salio del Sistema',
-                 'model'=>'\App\Models\User',
-                 'model_id'=>Auth::user()->id,
-                'user_id'=>Auth::user()->id,
-                 ]);
+                'accion' => 'Salio del Sistema',
+                'model' => '\App\Models\User',
+                'model_id' => Auth::user()->id,
+                'user_id' => Auth::user()->id,
+            ]);
             if (Auth::check()) {
                 Auth::user()->token()->revoke();
             }
-     return \response()->json(['state'=>0,'message'=>'cierre  de sesión correctamente'],200);
-    
-    } catch (Exception $e) {
-        return ['state' => '1', 'exception' => (string) $e];
+            return \response()->json(['state' => 0, 'message' => 'cierre  de sesión correctamente'], 200);
+        } catch (Exception $e) {
+            return ['state' => '1', 'exception' => (string) $e];
+        }
     }
-}
 }
