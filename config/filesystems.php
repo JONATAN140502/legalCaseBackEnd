@@ -27,7 +27,7 @@ return [
     | Supported Drivers: "local", "ftp", "sftp", "s3"
     |
     */
-
+ 
     'disks' => [
 
         'local' => [
@@ -43,7 +43,10 @@ return [
             'visibility' => 'public',
             'throw' => false,
         ],
-
+        'public_server' => [
+            'driver' => 'local',
+            'root'   => base_path() .'/../sisgefiles/',
+        ],
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
