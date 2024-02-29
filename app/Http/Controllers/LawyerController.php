@@ -409,11 +409,13 @@ class LawyerController extends Controller
             // Creación de la persona
             $persona = $this->crearPersona($request);
 
+            $personaId =  $persona->getAttribute('per_id');
+
             // Creación del usuario
-            $this->crearUsuario($request, $persona);
+            $this->crearUsuario($request, $personaId);
 
             // Creación del abogado
-            $this->crearAbogado($request, $persona);
+            $this->crearAbogado($request, $personaId);
 
             DB::commit();
 
@@ -453,26 +455,27 @@ class LawyerController extends Controller
             'nat_correo' => strtolower($request->input('nat_correo')),
             'per_condicion' => $request->input('per_condicion'),
         ]);
+
     }
 
-    private function crearUsuario(Request $request, Person $persona)
+    private function crearUsuario(Request $request, $personaId)
     {
         User::create([
             'name' => $request->input('nat_nombres'),
             'email' => $request->input('nat_correo'),
             'usu_rol' => $request->input('per_condicion'),
-            'per_id' => $persona->per_id,
+            'per_id' => $personaId,
             'password' => bcrypt($request->input('nat_dni')),
         ]);
     }
 
-    private function crearAbogado(Request $request, Person $persona)
+    private function crearAbogado(Request $request, $personaId)
     {
         if ($request->input('rol') === 'ABOGADO') {
             Lawyer::create([
                 'abo_carga_laboral' => 0,
                 'abo_disponibilidad' => 'LIBRE',
-                'per_id' => $persona->per_id,
+                'per_id' => $personaId,
             ]);
         }
     }
