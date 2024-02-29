@@ -90,7 +90,10 @@ Route::middleware(['auth:api'])->group(function () {
 
     Route::prefix('personas')->group(function () {
         Route::get('/', [PersonController::class , 'index'])->name('demandante.index');
+        Route::post('/equipo', [PersonController::class, 'equipo'])->name('demandante.equipo');
     });
+
+
     // Demandantes
     Route::prefix('demandante')->group(function () {
         Route::get('/', [PersonController::class , 'index'])->name('demandante.index');

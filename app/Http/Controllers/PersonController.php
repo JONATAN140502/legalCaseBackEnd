@@ -11,6 +11,7 @@ use App\Models\Procesal;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB; // Add this line to import DB
+use PhpParser\Node\Stmt\TryCatch;
 
 class PersonController extends Controller
 {
@@ -32,6 +33,40 @@ class PersonController extends Controller
             if ($personas->isEmpty()) {
                 return response()->json(['message' => 'No se encontraron personas.'], 404);
             }
+
+            return response()->json(['data' => $personas], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Ocurrió un error al procesar la solicitud.'], 500);
+        }
+    }
+
+    //equipo
+    protected function equipo(Request $request)
+    {
+        try {
+            $personas = Person::whereIn('per_condicion', ['ABOGADO', 'ASISTENTE', 'BOLSA'])
+                ->orderByDesc('updated_at')
+                ->get();
+
+            if ($personas->isEmpty()) {
+                return response()->json(['message' => 'No se encontraron personas.'], 404);
+            }
+
+            // Mapea los resultados para seleccionar solo los campos deseados
+            $personas = $personas->map(function ($persona) {
+                return [
+                    'per_id' => $persona->per_id,
+                    'nat_dni' => $persona->nat_dni,
+                    'nat_apellido_paterno' => $persona->nat_apellido_paterno,
+                    'nat_apellido_materno' => $persona->nat_apellido_materno,
+                    'nat_nombres' => $persona->nat_nombres,
+                    'nat_telefono' => $persona->nat_telefono,
+                    'nat_correo' => $persona->nat_correo,
+                    'per_condicion' =>  ucwords(strtolower($persona->per_condicion)),
+                    'created_at' => $persona->created_at,
+                    'updated_at' => $persona->updated_at,
+                ];
+            });
 
             return response()->json(['data' => $personas], 200);
         } catch (\Exception $e) {
