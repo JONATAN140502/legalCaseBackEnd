@@ -56,7 +56,7 @@ class PersonController extends Controller
     protected function equipo(Request $request)
     {
         try {
-            $personas = Person::whereIn('per_condicion', ['ABOGADO', 'ASISTENTE', 'BOLSA'])
+            $personas = Person::whereIn('per_condicion', ['ABOGADO', 'ASISTENTE', 'BOLSA', 'SECRETARIA'])
                 ->orderByDesc('updated_at')
                 ->get();
 
