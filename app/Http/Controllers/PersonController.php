@@ -34,6 +34,18 @@ class PersonController extends Controller
                 return response()->json(['message' => 'No se encontraron personas.'], 404);
             }
 
+            // Transformar la primera letra de cada palabra a mayúsculas
+            $personas->transform(function ($persona) {
+                $persona->tipo_procesal = ucwords(strtolower($persona->tipo_procesal));
+                $persona->per_condicion = ucwords(strtolower($persona->per_condicion));
+                $persona->nat_apellido_paterno = ucwords(strtolower($persona->nat_apellido_paterno));
+                $persona->nat_apellido_materno = ucwords(strtolower($persona->nat_apellido_materno));
+                $persona->nat_nombres = ucwords(strtolower($persona->nat_nombres));
+                $persona->jur_razon_social = ucwords(strtolower($persona->jur_razon_social));
+                
+                return $persona;
+            });
+
             return response()->json(['data' => $personas], 200);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Ocurrió un error al procesar la solicitud.'], 500);
