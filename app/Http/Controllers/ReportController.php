@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Resources\{
     LawyerResource
 };
+use App\Models\Audit;
 
 class ReportController extends Controller
 {
@@ -42,9 +43,8 @@ class ReportController extends Controller
     }
     protected function inicioAdmin(Request $request)
     {
-        $exp = \App\Models\Audit::orderBy('created_at', 'DESC')
+        $exp = Audit::orderBy('created_at', 'DESC')
             ->with('user','exp')
-            ->take(10)
             ->get();
 
         return response()->json([
