@@ -471,7 +471,7 @@ class LawyerController extends Controller
 
     private function crearAbogado(Request $request, $personaId)
     {
-        if ($request->input('rol') === 'ABOGADO') {
+        if ($request->input('per_condicion') === 'Abogado') {
             Lawyer::create([
                 'abo_carga_laboral' => 0,
                 'abo_disponibilidad' => 'LIBRE',
