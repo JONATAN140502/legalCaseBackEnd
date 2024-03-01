@@ -306,29 +306,38 @@ class LawyerController extends Controller
             return ['state' => '1', 'exception' => (string) $e];
         }
     }
-
     protected function changeOfLawyer(Request $request)
     {
         try {
             $i = 0;
-            $apellidoPaterno = null;
-            $jur_razon_social = null;
-
+    
             $expedientes = \App\Models\Proceeding::where('type_id', 1)
-                ->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])->get();
+                ->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])
+                ->get();
+    
             foreach ($expedientes as $expediente) {
                 $primerProcesal = $expediente->procesal()->orderBy('proc_id')->first();
+                $apellidoPaterno = null;
+                $jur_razon_social = null;
+    
                 if ($primerProcesal->tipo_persona == 'NATURAL') {
-                    $apellidoPaterno = \App\Models\Person::find($primerProcesal->persona->per_id)->nat_apellido_paterno;
+                    $apellidoPaterno = \App\Models\Person::find($primerProcesal->persona->per_id)
+                    ->nat_apellido_paterno;
                 } else {
-                    $jur_razon_social = \App\Models\Person::find($primerProcesal->persona->per_id)->jur_razon_social;
+                    $jur_razon_social = \App\Models\Person::find($primerProcesal->persona->per_id)
+                    ->jur_razon_social;
                 }
+    
                 $letrasSeleccionadas = $request->letras_selecionadas;
-
+    
                 foreach ($letrasSeleccionadas as $letra) {
+                    // Obtener la longitud de la letra
+                    $tam = strlen($letra);
+    
+                    // Verificar si la letra seleccionada coincide con los primeros caracteres del apellido o razón social
                     if (
-                        (strtoupper(substr($apellidoPaterno, 0, 1)) == strtoupper($letra)) ||
-                        (strtoupper(substr($jur_razon_social, 0, 1)) == strtoupper($letra))
+                        (strtoupper(substr($apellidoPaterno, 0, $tam)) == strtoupper($letra)) ||
+                        (strtoupper(substr($jur_razon_social, 0, $tam)) == strtoupper($letra))
                     ) {
                         $expediente->abo_id = $request->abogado_asignado;
                         $expediente->save();
@@ -336,6 +345,8 @@ class LawyerController extends Controller
                     }
                 }
             }
+    
+            // Realizar la transacción de la base de datos después del bucle foreach
             \DB::beginTransaction();
             \App\Models\Audit::create([
                 'accion' => 'Cambio de abogado a exp. con letra ',
@@ -344,14 +355,14 @@ class LawyerController extends Controller
                 'user_id' => \Auth::user()->id,
             ]);
             \DB::commit();
-
+    
             return response()->json(['cantidad' => $i, 'state' => 0], 200);
         } catch (\Exception $e) {
             // Manejar cualquier error
             return response()->json(['error' => $e->getMessage(), 'state' => 1], 500);
         }
     }
-
+    
     protected function formatProcesalData($procesal)
     {
         $processedProcesals = [];
