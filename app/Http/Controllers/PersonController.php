@@ -27,6 +27,7 @@ class PersonController extends Controller
     {
         try {
             $personas = Person::with(['procesal'])
+                ->whereNotNull('tipo_procesal')
                 ->orderByDesc('updated_at')
                 ->get();
 
@@ -42,7 +43,7 @@ class PersonController extends Controller
                 $persona->nat_apellido_materno = ucwords(strtolower($persona->nat_apellido_materno));
                 $persona->nat_nombres = ucwords(strtolower($persona->nat_nombres));
                 $persona->jur_razon_social = ucwords(strtolower($persona->jur_razon_social));
-                
+
                 return $persona;
             });
 
@@ -231,6 +232,74 @@ class PersonController extends Controller
         }
     }
 
+    //detalles de la persona del equipo
+    protected function detallePersona(Request $request)
+    {
+        $tipo_persona = null;
+        $idPersona = $request->per_id;
+
+        $person = Person::where('per_id', $idPersona)->first();
+        if ($person->nat_dni != null) {
+            $tipo_persona = 'NATURAL';
+        } else {
+            $tipo_persona = 'JURIDICA';
+        }
+
+        if (!$person) {
+            return response()->json(['state' => 1, 'message' => 'Persona no encontrada'], 404);
+        }
+
+        $procesal = Procesal::where('per_id', $person->per_id)
+            ->orderBy('created_at', 'DESC')
+            ->first();
+
+        if (!$procesal) {
+            return response()->json(['state' => 1, 'message' => 'Procesal no encontrado para la persona'], 404);
+        }
+
+        $expediente = $procesal->expediente;
+        $direccion = Address::where('per_id', $person->per_id)
+            ->with('district.province.departament')
+            ->first();
+
+        if (!$expediente) {
+            return response()->json(['state' => 1, 'message' => 'Expediente no encontrado para el proceso'], 404);
+        }
+
+        // Construye la respuesta con la estructura deseada
+        $data = [
+            'data' => [
+                'expediente' => [
+                    'exp_id' => $expediente->exp_id,
+                    'exp_numero' => $expediente->exp_numero,
+                    'multiple' => $expediente->multiple,
+                ],
+                'persona' => [
+                    'tipo_persona' => $tipo_persona,
+                    'nat_dni' => $tipo_persona === 'NATURAL' ? $person->nat_dni : null,
+                    'nat_apellido_paterno' => $tipo_persona === 'NATURAL' ? ucwords(strtolower($person->nat_apellido_paterno)) : null,
+                    'nat_apellido_materno' => $tipo_persona === 'NATURAL' ? ucwords(strtolower($person->nat_apellido_materno)) : null,
+                    'nat_nombres' => $tipo_persona === 'NATURAL' ? ucwords(strtolower($person->nat_nombres)) : null,
+                    'nat_telefono' => $tipo_persona === 'NATURAL' ? $person->nat_telefono : null,
+                    'nat_correo' => $tipo_persona === 'NATURAL' ? strtolower($person->nat_correo) : null,
+                    'jur_ruc' => $tipo_persona === 'JURIDICA' ? $person->jur_ruc : null,
+                    'jur_razon_social' => $tipo_persona === 'JURIDICA' ? ucwords(strtolower($person->jur_razon_social)) : null,
+                    'jur_telefono' => $tipo_persona === 'JURIDICA' ? $person->jur_telefono : null,
+                    'jur_correo' => $tipo_persona === 'JURIDICA' ? strtolower($person->jur_correo) : null,
+                ],
+                'direccion' => [
+                    'dir_calle_av' => ucwords(strtolower($direccion->dir_calle_av)),
+                    'dis_nombre' => ucwords(strtolower($direccion->district->dis_nombre)),
+                    'pro_nombre' => ucwords(strtolower($direccion->district->province->pro_nombre)),
+                    'dep_nombre' => ucwords(strtolower($direccion->district->province->departament->dep_nombre)),
+                ]
+            ],
+        ];
+
+        return response()->json($data, 200);
+    }
+
+
     protected function detalleDemandante($id)
     {
         $tipo_persona = null;
@@ -241,13 +310,6 @@ class PersonController extends Controller
         } else {
             $tipo_persona = 'JURIDICA';
         }
-        // if (strlen($doc) === 8) {
-        //     $person = Person::where('nat_dni', $doc)->first();
-        //     $tipo_persona = 'NATURAL';
-        // } else {
-        //     $person = Person::where('jur_ruc', $doc)->first();
-        //     $tipo_persona = 'JURIDICA';
-        // }
 
         if (!$person) {
             return response()->json(['state' => 1, 'message' => 'Persona no encontrada'], 404);

@@ -89,9 +89,10 @@ Route::middleware(['auth:api'])->group(function () {
     });
 
     Route::prefix('personas')->group(function () {
-        Route::get('/', [PersonController::class , 'index'])->name('demandante.index');
-        Route::post('/equipo', [PersonController::class, 'equipo'])->name('demandante.equipo');
+        Route::get('/', [PersonController::class , 'index'])->name('person.index');
+        Route::post('/equipo', [PersonController::class, 'equipo'])->name('person.equipo');
         Route::post('/crearIntegrante', [LawyerController::class, 'crearIntegrante'])->name('lawyer.crearIntegrante');
+        Route::post('/detallePersona', [PersonController::class, 'detallePersona'])->name('person.detallePersona');
     });
 
 
