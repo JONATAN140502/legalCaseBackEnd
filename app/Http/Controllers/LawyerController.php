@@ -314,6 +314,7 @@ class LawyerController extends Controller
             $expedientes = \App\Models\Proceeding::where('type_id', 1)
                 ->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])
                 ->get();
+            $abo=\App\Models\Lawyer::where('abo_id',$request->abogado_asignado)->first();
     
             foreach ($expedientes as $expediente) {
                 $primerProcesal = $expediente->procesal()->orderBy('proc_id')->first();
@@ -345,9 +346,14 @@ class LawyerController extends Controller
                     }
                 }
             }
+
     
             // Realizar la transacción de la base de datos después del bucle foreach
             \DB::beginTransaction();
+
+           $abo->abo_carga_laboral=$abo->abo_carga_laboral+$i;
+           $abo->save();
+
             \App\Models\Audit::create([
                 'accion' => 'Cambio de abogado a exp. con letra ',
                 'model' => '\App\Models\Lawyer',
