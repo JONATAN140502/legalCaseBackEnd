@@ -453,7 +453,7 @@ class LawyerController extends Controller
             'nat_nombres' => ucwords(strtolower($request->input('nat_nombres'))),
             'nat_telefono' => $request->input('nat_telefono'),
             'nat_correo' => strtolower($request->input('nat_correo')),
-            'per_condicion' => $request->input('per_condicion'),
+            'per_condicion' => strtoupper($request->input('per_condicion')),
         ]);
 
     }
@@ -463,7 +463,7 @@ class LawyerController extends Controller
         User::create([
             'name' => $request->input('nat_nombres'),
             'email' => $request->input('nat_correo'),
-            'usu_rol' => $request->input('per_condicion'),
+            'usu_rol' => strtoupper($request->input('per_condicion')),
             'per_id' => $personaId,
             'password' => bcrypt($request->input('nat_dni')),
         ]);

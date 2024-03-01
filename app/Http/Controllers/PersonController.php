@@ -56,36 +56,57 @@ class PersonController extends Controller
     //equipo
     protected function equipo(Request $request)
     {
-        try {
-            $personas = Person::whereIn('per_condicion', ['ABOGADO', 'ASISTENTE', 'BOLSA', 'SECRETARIA'])
-                ->orderByDesc('updated_at')
-                ->get();
+        $lawyers = \App\Models\Lawyer::orderBy('created_at', 'DESC')->with('persona')->get();
 
-            if ($personas->isEmpty()) {
-                return response()->json(['message' => 'No se encontraron personas.'], 404);
-            }
+        $data = $lawyers->map(function ($lawyer) {
+            return [
+                'nat_correo' => $lawyer->persona->nat_correo,
+                'abo_id' => $lawyer->abo_id,
+                'abo_carga_laboral' => $lawyer->abo_carga_laboral,
+                'abo_disponibilidad' => $lawyer->abo_disponibilidad,
+                'per_id' => $lawyer->persona->per_id,
+                'nat_dni' => $lawyer->persona->nat_dni,
+                'nat_apellido_paterno' => ucwords(strtolower($lawyer->persona->nat_apellido_paterno)),
+                'nat_apellido_materno' => ucwords(strtolower($lawyer->persona->nat_apellido_materno)),
+                'nat_nombres' => ucwords(strtolower($lawyer->persona->nat_nombres)),
+                'nat_telefono' => $lawyer->persona->nat_telefono,
+            ];
+        });
 
-            // Mapea los resultados para seleccionar solo los campos deseados
-            $personas = $personas->map(function ($persona) {
-                return [
-                    'per_id' => $persona->per_id,
-                    'nat_dni' => $persona->nat_dni,
-                    'nat_apellido_paterno' => $persona->nat_apellido_paterno,
-                    'nat_apellido_materno' => $persona->nat_apellido_materno,
-                    'nat_nombres' => $persona->nat_nombres,
-                    'nat_telefono' => $persona->nat_telefono,
-                    'nat_correo' => $persona->nat_correo,
-                    'per_condicion' =>  ucwords(strtolower($persona->per_condicion)),
-                    'created_at' => $persona->created_at,
-                    'updated_at' => $persona->updated_at,
-                ];
-            });
-
-            return response()->json(['data' => $personas], 200);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Ocurrió un error al procesar la solicitud.'], 500);
-        }
+        return \response()->json(['data' => $data], 200);
     }
+    // protected function equipo(Request $request)
+    // {
+    //     try {
+    //         $personas = Person::whereIn('per_condicion', ['ABOGADO', 'ASISTENTE', 'BOLSA', 'SECRETARIA'])
+    //             ->orderByDesc('updated_at')
+    //             ->get();
+
+    //         if ($personas->isEmpty()) {
+    //             return response()->json(['message' => 'No se encontraron personas.'], 404);
+    //         }
+
+    //         // Mapea los resultados para seleccionar solo los campos deseados
+    //         $personas = $personas->map(function ($persona) {
+    //             return [
+    //                 'per_id' => $persona->per_id,
+    //                 'nat_dni' => $persona->nat_dni,
+    //                 'nat_apellido_paterno' => $persona->nat_apellido_paterno,
+    //                 'nat_apellido_materno' => $persona->nat_apellido_materno,
+    //                 'nat_nombres' => $persona->nat_nombres,
+    //                 'nat_telefono' => $persona->nat_telefono,
+    //                 'nat_correo' => $persona->nat_correo,
+    //                 'per_condicion' =>  ucwords(strtolower($persona->per_condicion)),
+    //                 'created_at' => $persona->created_at,
+    //                 'updated_at' => $persona->updated_at,
+    //             ];
+    //         });
+
+    //         return response()->json(['data' => $personas], 200);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['message' => 'Ocurrió un error al procesar la solicitud.'], 500);
+    //     }
+    // }
 
     //traer los demandados
     protected function indexdemandados(Request $request)
