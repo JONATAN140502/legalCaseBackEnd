@@ -13,6 +13,7 @@ use App\Http\Controllers\AssistantController;
 use App\Http\Controllers\AudienceController;
 use App\Http\Controllers\PersonController;
 use App\Http\Controllers\ProceedingTypeController;
+use App\Http\Controllers\FiscaliaController;
 
 Route::prefix('/user')->group(function () {
     Route::post('/login', 'App\Http\Controllers\LoginController@login');
@@ -78,6 +79,14 @@ Route::middleware(['auth:api'])->group(function () {
         Route::post('/store', [InstanceController::class, 'store'])->name('Instance.store');
         Route::put('/update', [InstanceController::class, 'update'])->name('Instance.update');
         Route::delete('/destroy/{id}', [InstanceController::class, 'destroy'])->name('Instance.destroy');
+    });
+     //fiscalias
+     Route::prefix('fiscalia')->group(function () {
+        Route::post('/', [FiscaliaController::class, 'index'])->name('Fiscalia.index');
+        Route::post('/show', [FiscaliaController::class, 'show'])->name('Fiscalia.show');
+        Route::post('/store', [FiscaliaController::class, 'store'])->name('Fiscalia.store');
+        Route::put('/update', [FiscaliaController::class, 'update'])->name('Fiscalia.update');
+        Route::delete('/destroy', [FiscaliaController::class, 'destroy'])->name('Fiscalia.destroy');
     });
     //especialidades
     Route::prefix('specialty')->group(function () {
