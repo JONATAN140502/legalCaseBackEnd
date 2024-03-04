@@ -8,10 +8,7 @@ class SpecialtyController extends Controller
 {
     public function index(Request $request)
     {
-        // $specialties = \App\Models\Specialty::where('ins_id', $request->ins_id)
-        //     ->orderBy('created_at', 'DESC')
-        //     ->get(['esp_id','esp_nombre','ins_id']);
-        $specialties = \App\Models\Specialty::orderBy('created_at', 'DESC')->get(['esp_id','esp_nombre']);
+        $specialties = \App\Models\Specialty::orderBy('created_at', 'DESC')->get(['esp_id','esp_nombre','type_id']);
 
         return response()->json(['data' => $specialties], 200);
     }

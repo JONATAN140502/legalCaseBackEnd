@@ -12,7 +12,8 @@ class Claim extends Model
 
     protected $primaryKey = 'pre_id';
     protected $fillable = [
-        'pre_nombre'
+        'pre_nombre',
+        'type_id'
     ];
     protected $dates = ['deleted_at'];
 

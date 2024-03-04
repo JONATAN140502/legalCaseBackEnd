@@ -165,6 +165,7 @@ class ProceedingController extends Controller
             $exp_monto_pretencion = isset($request->exp['exp_monto_pretencion']) ? trim($request->exp['exp_monto_pretencion']) : null;
             $exp_estado_proceso = isset($request->exp['exp_estado_proceso']) ? trim($request->exp['exp_estado_proceso']) : null;
             $exp_juzgado = isset($request->exp['exp_juzgado']) ? strtoupper(trim($request->exp['exp_juzgado'])) : null;
+            $carpeta= isset($request->exp['carpetafiscal']) ? strtoupper(trim($request->exp['carpetafiscal'])) : null;
 
             $exp = \App\Models\Proceeding::create([
                 'exp_numero' => $exp_numero,
@@ -179,6 +180,7 @@ class ProceedingController extends Controller
                 'exp_juzgado' => $exp_juzgado,
                 'multiple' => $multiple,
                 'abo_id' => $request->abo_id,
+                'carpeta_fiscal'=>$carpeta,
                 'type_id' => $request->tipo
             ]);
 

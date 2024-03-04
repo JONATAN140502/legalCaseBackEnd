@@ -13,7 +13,8 @@ class Court extends Model
     protected $fillable = [
         'co_nombre',
         'judis_id',
-        'co_isFvorite'
+        'co_isFvorite',
+        'type_id'
     ];
     protected $dates = ['deleted_at'];
 

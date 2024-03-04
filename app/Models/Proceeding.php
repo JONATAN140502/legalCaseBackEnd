@@ -23,7 +23,9 @@ class Proceeding extends Model
         'exp_juzgado',
         'abo_id',
         'multiple',
-        'type_id'
+        'type_id',
+        'carpeta_fiscal',
+        'sentencia'
     ];
 
     protected $dates = ['deleted_at'];
