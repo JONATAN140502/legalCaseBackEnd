@@ -22,7 +22,8 @@ class ProceedingController extends Controller
     protected function index()
     {
         $procedings = \App\Models\Proceeding::orderBy('created_at', 'DESC')
-            ->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])
+            ->whereIn('exp_estado_proceso', ['EN TRAMITE', 
+            'EN EJECUCION','EN INVESTIGACION'])
             ->with('procesal.persona', 'pretension', 'materia',)
             ->get();
 
@@ -34,7 +35,7 @@ class ProceedingController extends Controller
                 'numero' => $proceeding->exp_numero,
                 'fecha_inicio' => $proceeding->exp_fecha_inicio,
                 'pretencion' => optional($proceeding->pretension)->pre_nombre,
-                'materia' => $proceeding->materia->mat_nombre,
+                'materia' => optional($proceeding->materia)->mat_nombre,
                 'monto_pretencion' => $proceeding->exp_monto_pretencion,
                 'estado_proceso' => ucwords(strtolower($proceeding->exp_estado_proceso)),
                 'multiple' => $proceeding->multiple,
