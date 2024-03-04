@@ -44,7 +44,9 @@ class ReportController extends Controller
     protected function inicioAdmin(Request $request)
     {
         $exp = Audit::orderBy('created_at', 'DESC')
-            ->with('user','exp')
+            ->with(['user' => function($query) {
+                $query->withTrashed();
+            }, 'exp'])
             ->get();
 
         return response()->json([
