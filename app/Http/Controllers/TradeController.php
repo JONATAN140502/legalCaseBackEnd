@@ -25,7 +25,8 @@ class TradeController extends Controller
             $trades = Trade::with([
                 'area',
                 'lawyer.persona',
-                'assistant.persona'
+                'assistant.persona',
+                'observations'
             ])->when(
                 'tra_type_person',
                 function ($query, $value) {
@@ -36,7 +37,7 @@ class TradeController extends Controller
                         $query->where('tra_type_person', 'ASISTENTE');
                     }
                 }
-            )->get();
+            )->orderBy('created_at', 'desc')->get();
 
             return response()->json(['state' => 'success', 'data' => $trades], 200);
         } catch (QueryException $e) {
@@ -123,7 +124,11 @@ class TradeController extends Controller
     {
         try {
             $trade = Trade::with([
-                'area'])->find($id);
+                'area','observations' => function ($query) {
+                    // Ordenar las observaciones por 'created_at' de forma descendente
+                    $query->orderBy('created_at', 'desc');
+                }
+                ])->find($id);
             $persons = $trade->persons;
             return response()->json(['state' => 'success', 'trade' => $trade, 'persons'=>$persons], 200);
         } catch (QueryException $e) {

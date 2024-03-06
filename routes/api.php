@@ -231,4 +231,10 @@ Route::middleware(['auth:api'])->group(function () {
     Route::prefix('person')->group(function () {
         Route::get('/', 'App\Http\Controllers\PersonController@indexPersons')->name('person.index');
     });
+
+    //Observation
+    Route::prefix('observation')->group(function () {
+        Route::post('/create', 'App\Http\Controllers\ObservationController@create')->name('observation.create');
+        Route::put('/update', 'App\Http\Controllers\ObservationController@update')->name('observation.update');
+    });
 });

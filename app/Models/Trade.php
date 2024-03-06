@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Lawyer;
 use App\Models\Assistant;
 use App\Models\Area;
+use App\Models\Observation;
 
 class Trade extends Model
 {
@@ -47,5 +48,9 @@ class Trade extends Model
 
     public function persons(){
         return $this->belongsToMany(Person::class, 'person_trades', 'pt_tra_id', 'pt_per_id');
+    }
+
+    public function observations(){
+        return $this->hasMany(Observation::class, 'obs_tra_id', 'tra_id');
     }
 }
