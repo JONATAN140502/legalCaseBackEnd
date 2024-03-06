@@ -30,6 +30,7 @@ class ClaimController extends Controller
             \DB::beginTransaction();
            $claim = \App\Models\Claim::create([
                 'pre_nombre' => strtoupper(trim($request->pre_nombre)),
+                'type_id'=>$request->tipo
             ]);
             \DB::commit();
             return \response()->json(['state' => 0, 'data' => $claim], 200);

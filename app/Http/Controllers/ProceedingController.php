@@ -22,8 +22,9 @@ class ProceedingController extends Controller
     protected function index()
     {
         $procedings = \App\Models\Proceeding::orderBy('created_at', 'DESC')
-            ->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])
-            ->with('procesal.persona', 'pretension', 'materia')
+            ->whereIn('exp_estado_proceso', ['EN TRAMITE', 
+            'EN EJECUCION','EN INVESTIGACION'])
+            ->with('procesal.persona', 'pretension', 'materia',)
             ->get();
 
         $formattedData = [];
@@ -34,11 +35,11 @@ class ProceedingController extends Controller
                 'numero' => $proceeding->exp_numero,
                 'fecha_inicio' => $proceeding->exp_fecha_inicio,
                 'pretencion' => optional($proceeding->pretension)->pre_nombre,
-                'materia' => $proceeding->materia->mat_nombre,
+                'materia' => optional($proceeding->materia)->mat_nombre,
                 'monto_pretencion' => $proceeding->exp_monto_pretencion,
                 'estado_proceso' => ucwords(strtolower($proceeding->exp_estado_proceso)),
                 'multiple' => $proceeding->multiple,
-                // 'creacion'=>$proceeding->created_at->diffForHumans(),
+                'tipo_exp'=>$proceeding->type_id,
                 'creacion' => $proceeding->created_at,
                 'procesal' => $processedProcesals,
             ];
@@ -165,6 +166,7 @@ class ProceedingController extends Controller
             $exp_monto_pretencion = isset($request->exp['exp_monto_pretencion']) ? trim($request->exp['exp_monto_pretencion']) : null;
             $exp_estado_proceso = isset($request->exp['exp_estado_proceso']) ? trim($request->exp['exp_estado_proceso']) : null;
             $exp_juzgado = isset($request->exp['exp_juzgado']) ? strtoupper(trim($request->exp['exp_juzgado'])) : null;
+            $carpeta= isset($request->exp['carpetafiscal']) ? strtoupper(trim($request->exp['carpetafiscal'])) : null;
 
             $exp = \App\Models\Proceeding::create([
                 'exp_numero' => $exp_numero,
@@ -179,6 +181,7 @@ class ProceedingController extends Controller
                 'exp_juzgado' => $exp_juzgado,
                 'multiple' => $multiple,
                 'abo_id' => $request->abo_id,
+                'carpeta_fiscal'=>$carpeta,
                 'type_id' => $request->tipo
             ]);
 

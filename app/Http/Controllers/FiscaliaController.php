@@ -11,13 +11,13 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
-class InstanceController extends Controller
+class FiscaliaController extends Controller
 {
-
-    public function index()
+    
+    public function index(Request $request)
     {
         try {
-            $instances = Instance::latest()->get();
+            $instances = Instance::where('judis_id',$request->judis_id)->get();
             return response()->json(['state' => 'success', 'data' => $instances], 200);
         } catch (QueryException $e) {
             $errorMessage = $e->getMessage();
@@ -43,14 +43,14 @@ class InstanceController extends Controller
     {
         $this->validate($request, [
             'ins_nombre' => 'required|string|max:255',
-            
         ]);
 
         try {
             DB::beginTransaction();
             $instances = Instance::create([
                 'ins_nombre' => ucwords(strtolower(trim($request->ins_nombre))),
-                'type_id'=>$request->tipo
+                'judis_id'=>$request->judis_id,
+                'type_id'=>2
             ]);
             
             DB::commit();
@@ -81,6 +81,7 @@ class InstanceController extends Controller
             $instances = Instance::findOrFail($request->ins_id);
             $instances->update([
                 'ins_nombre' => ucwords(strtolower(trim($request->ins_nombre))),
+                'judis_id'=>$request->judis_id
             ]);
             $updatedData = Instance::find($instances->ins_id);
 

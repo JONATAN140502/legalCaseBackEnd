@@ -12,7 +12,8 @@ class Instance extends Model
     protected $primaryKey = 'ins_id';
     protected $fillable = [
         'ins_nombre',
-        // 'judis_id'
+        'judis_id',
+        'type_id'
     ];
     protected $dates = ['created_at', 'updated_at', 'deleted_at'];
 

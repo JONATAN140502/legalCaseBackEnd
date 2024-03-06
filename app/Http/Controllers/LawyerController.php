@@ -54,8 +54,9 @@ class LawyerController extends Controller
         return \response()->json(['data' => $data], 200);
     }
 
-    public function listTrades(Request $request){
-        try{
+    public function listTrades(Request $request)
+    {
+        try {
             $lawyer = Lawyer::findOrFail($request->abo_id);
             $trades = $lawyer->trades()->with('area')->get();
             return response()->json(['state' => 'success', 'data' => $trades], 200);
@@ -148,7 +149,6 @@ class LawyerController extends Controller
         }
     }
 
-
     protected function update(Request $request)
     {
         try {
@@ -164,7 +164,7 @@ class LawyerController extends Controller
             $persona->save();
             //actulizar  su usuario 
             $user = \App\Models\User::where('per_id', $persona->per_id)->first();
-            $user->name = ucwords(strtolower(trim($request->nat_nombres.' '.$request->nat_apellido_paterno . ' ' . $request->nat_apellido_materno )));
+            $user->name = ucwords(strtolower(trim($request->nat_nombres . ' ' . $request->nat_apellido_paterno . ' ' . $request->nat_apellido_materno)));
             $user->email = trim($request->nat_correo);
             $user->usu_rol = 'ABOGADO';
             $user->password = bcrypt(trim($request->nat_dni));
@@ -249,8 +249,8 @@ class LawyerController extends Controller
                     $diasFaltantes = $fechaVencimiento->startOfDay()->diffInDays($today);
                     $porcentaje = round($diasFaltantes / $alerta->ale_dias_faltantes, 2);
                     $alertas->push([
-                        'ale_fecha_vencimiento' =>Carbon::parse($alerta->ale_fecha_vencimiento)->format('Y-m-d'), // Obtén la fecha en formato 'Y-m-d'
-                        'ale_descripcion' =>$alerta->ale_descripcion,
+                        'ale_fecha_vencimiento' => Carbon::parse($alerta->ale_fecha_vencimiento)->format('Y-m-d'), // Obtén la fecha en formato 'Y-m-d'
+                        'ale_descripcion' => $alerta->ale_descripcion,
                         'fecha' => Carbon::parse($alerta->ale_fecha_vencimiento)->format('d-m-Y'),
                         'ale_expediente' => $alerta->expediente ? $alerta->expediente->exp_numero : 'N/A',
                         'ale_porcentaje' => $porcentaje,
@@ -306,30 +306,39 @@ class LawyerController extends Controller
             return ['state' => '1', 'exception' => (string) $e];
         }
     }
-
     protected function changeOfLawyer(Request $request)
     {
         try {
-            $i=0;
-            $apellidoPaterno =null;
-            $jur_razon_social=null;
-
-            $expedientes = \App\Models\Proceeding::
-            where('type_id',1)
-            ->whereIn('exp_estado_proceso', ['EN TRAMITE','EN EJECUCION'])->get();
+            $i = 0;
+    
+            $expedientes = \App\Models\Proceeding::where('type_id', 1)
+                ->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])
+                ->get();
+            $abo=\App\Models\Lawyer::where('abo_id',$request->abogado_asignado)->first();
+    
             foreach ($expedientes as $expediente) {
                 $primerProcesal = $expediente->procesal()->orderBy('proc_id')->first();
-                if ($primerProcesal->tipo_persona== 'NATURAL') {
-                    $apellidoPaterno = \App\Models\Person::find($primerProcesal->persona->per_id)->nat_apellido_paterno;
+                $apellidoPaterno = null;
+                $jur_razon_social = null;
+    
+                if ($primerProcesal->tipo_persona == 'NATURAL') {
+                    $apellidoPaterno = \App\Models\Person::find($primerProcesal->persona->per_id)
+                    ->nat_apellido_paterno;
                 } else {
-                    $jur_razon_social = \App\Models\Person::find($primerProcesal->persona->per_id)->jur_razon_social;
+                    $jur_razon_social = \App\Models\Person::find($primerProcesal->persona->per_id)
+                    ->jur_razon_social;
                 }
+    
                 $letrasSeleccionadas = $request->letras_selecionadas;
-            
+    
                 foreach ($letrasSeleccionadas as $letra) {
+                    // Obtener la longitud de la letra
+                    $tam = strlen($letra);
+    
+                    // Verificar si la letra seleccionada coincide con los primeros caracteres del apellido o razón social
                     if (
-                        ( strtoupper(substr($apellidoPaterno,0, 1)) == strtoupper($letra)) ||
-                        (strtoupper(substr($jur_razon_social,0, 1)) == strtoupper($letra))
+                        (strtoupper(substr($apellidoPaterno, 0, $tam)) == strtoupper($letra)) ||
+                        (strtoupper(substr($jur_razon_social, 0, $tam)) == strtoupper($letra))
                     ) {
                         $expediente->abo_id = $request->abogado_asignado;
                         $expediente->save();
@@ -337,22 +346,29 @@ class LawyerController extends Controller
                     }
                 }
             }
+
+    
+            // Realizar la transacción de la base de datos después del bucle foreach
             \DB::beginTransaction();
-              \App\Models\Audit::create([
-                'accion'=>'Cambio de abogado a exp. con letra ',
-               'model'=>'\App\Models\Lawyer',
-                'model_id'=>$request->abogado_asignado,
-                'user_id'=>\Auth::user()->id,
+
+           $abo->abo_carga_laboral=$abo->abo_carga_laboral+$i;
+           $abo->save();
+
+            \App\Models\Audit::create([
+                'accion' => 'Cambio de abogado a exp. con letra ',
+                'model' => '\App\Models\Lawyer',
+                'model_id' => $request->abogado_asignado,
+                'user_id' => \Auth::user()->id,
             ]);
-             \DB::commit();
-       
-            return response()->json(['cantidad' =>$i , 'state' => 0], 200);
+            \DB::commit();
+    
+            return response()->json(['cantidad' => $i, 'state' => 0], 200);
         } catch (\Exception $e) {
             // Manejar cualquier error
             return response()->json(['error' => $e->getMessage(), 'state' => 1], 500);
         }
     }
-
+    
     protected function formatProcesalData($procesal)
     {
         $processedProcesals = [];
@@ -390,9 +406,94 @@ class LawyerController extends Controller
 
         return $processedProcesals;
     }
-    public function calendario(Request $request){
+    public function calendario(Request $request)
+    {
         $alertas = \App\Models\Alert::obtenerAlertasFaltantesabo($request->abo_id);
         $audiences = \App\Models\Audience::obtenerAudienciasFaltantesabo($request->abo_id);
-        return response()->json(['alertas' => $alertas,'audiencias'=>$audiences]);
-     }
+        return response()->json(['alertas' => $alertas, 'audiencias' => $audiences]);
+    }
+
+    //integrantes del equipo
+    public function crearIntegrante(Request $request)
+    {
+        try {
+            // Validaciones
+            $this->validarDuplicadoDNI($request->input('nat_dni'));
+            $this->validarDuplicadoCorreo(strtolower($request->input('nat_correo')));
+
+            DB::beginTransaction();
+
+            // Creación de la persona
+            $persona = $this->crearPersona($request);
+
+            $personaId =  $persona->getAttribute('per_id');
+
+            // Creación del usuario
+            $this->crearUsuario($request, $personaId);
+
+            // Creación del abogado
+            $this->crearAbogado($request, $personaId);
+
+            DB::commit();
+
+            // Respuesta exitosa
+            $jsonData = $persona->fresh()->toArray();
+            return response()->json(['state' => 0, 'data' => $jsonData], 201);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json(['state' => 1, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    private function validarDuplicadoDNI($dni)
+    {
+        $existingDni = Person::withTrashed()->where('nat_dni', $dni)->first();
+        if ($existingDni) {
+            throw new \Exception('El DNI ingresado ya existe.', 422);
+        }
+    }
+
+    private function validarDuplicadoCorreo($correo)
+    {
+        $existingEmail = Person::withTrashed()->where('nat_correo', $correo)->first();
+        if ($existingEmail) {
+            throw new \Exception('Error al registrar abogado: el correo electrónico ya existe.', 422);
+        }
+    }
+
+    private function crearPersona(Request $request)
+    {
+        return Person::create([
+            'nat_dni' => $request->input('nat_dni'),
+            'nat_apellido_paterno' => ucwords(strtolower($request->input('nat_apellido_paterno'))),
+            'nat_apellido_materno' => ucwords(strtolower($request->input('nat_apellido_materno'))),
+            'nat_nombres' => ucwords(strtolower($request->input('nat_nombres'))),
+            'nat_telefono' => $request->input('nat_telefono'),
+            'nat_correo' => strtolower($request->input('nat_correo')),
+            'per_condicion' => strtoupper($request->input('per_condicion')),
+        ]);
+
+    }
+
+    private function crearUsuario(Request $request, $personaId)
+    {
+        User::create([
+            'name' => $request->input('nat_nombres'),
+            'email' => $request->input('nat_correo'),
+            'usu_rol' => strtoupper($request->input('per_condicion')),
+            'per_id' => $personaId,
+            'password' => bcrypt($request->input('nat_dni')),
+        ]);
+    }
+
+    private function crearAbogado(Request $request, $personaId)
+    {
+        if ($request->input('per_condicion') === 'Abogado') {
+            Lawyer::create([
+                'abo_carga_laboral' => 0,
+                'abo_disponibilidad' => 'LIBRE',
+                'per_id' => $personaId,
+            ]);
+        }
+    }
 }

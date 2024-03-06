@@ -6,19 +6,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Claim extends Model
+class ProceedingTypes extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $primaryKey = 'pre_id';
+    protected $primaryKey = 'id';
+
     protected $fillable = [
-        'pre_nombre',
-        'type_id'
+        'name'
     ];
+
     protected $dates = ['deleted_at'];
 
-    public function expedientes()
+    public function expediente()
     {
-        return $this->hasMany(Expediente::class, 'pre_id', 'exp_pretencion');
+        return $this->hasMany(Proceeding::class, 'exp_id');
     }
 }

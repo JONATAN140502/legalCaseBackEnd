@@ -19,7 +19,7 @@ class CourtController extends Controller
         try {
             $juzgados =\App\Models\Court::where('judis_id',$request->judis_id)
             ->orderBy('created_at', 'DESC')
-            ->get(['co_id','co_nombre','judis_id','co_isFavorite']);
+            ->get(['co_id','co_nombre','judis_id','co_isFavorite','type_id']);
             return response()->json(['state' => 0, 'data' => $juzgados], 200);
         } catch (\Exception $e) {
             return response()->json(['state' => 1, 'error' => $e->getMessage()], 500);
@@ -34,6 +34,7 @@ class CourtController extends Controller
             $court = \App\Models\Court::create([
                 'co_nombre' =>  strtoupper(trim($request->co_nombre)),
                 'judis_id' =>  strtoupper(trim($request->judis_id)),
+                'type_id'=>strtoupper(trim($request->tipo))
             ]);
             DB::commit();
             return response()->json(['state' => 0, 'data' => $court], 200);

@@ -11,6 +11,9 @@ use App\Http\Controllers\ProceedingController;
 use App\Http\Controllers\LawyerController;
 use App\Http\Controllers\AssistantController;
 use App\Http\Controllers\AudienceController;
+use App\Http\Controllers\PersonController;
+use App\Http\Controllers\ProceedingTypeController;
+use App\Http\Controllers\FiscaliaController;
 
 Route::prefix('/user')->group(function () {
     Route::post('/login', 'App\Http\Controllers\LoginController@login');
@@ -77,6 +80,14 @@ Route::middleware(['auth:api'])->group(function () {
         Route::put('/update', [InstanceController::class, 'update'])->name('Instance.update');
         Route::delete('/destroy/{id}', [InstanceController::class, 'destroy'])->name('Instance.destroy');
     });
+     //fiscalias
+     Route::prefix('fiscalia')->group(function () {
+        Route::post('/', [FiscaliaController::class, 'index'])->name('Fiscalia.index');
+        Route::post('/show', [FiscaliaController::class, 'show'])->name('Fiscalia.show');
+        Route::post('/store', [FiscaliaController::class, 'store'])->name('Fiscalia.store');
+        Route::put('/update', [FiscaliaController::class, 'update'])->name('Fiscalia.update');
+        Route::delete('/destroy', [FiscaliaController::class, 'destroy'])->name('Fiscalia.destroy');
+    });
     //especialidades
     Route::prefix('specialty')->group(function () {
         Route::get('/', 'App\Http\Controllers\SpecialtyController@index')->name('specialty.index');
@@ -86,9 +97,17 @@ Route::middleware(['auth:api'])->group(function () {
         Route::post('/destroy', 'App\Http\Controllers\SpecialtyController@destroy')->name('specialty.eliminar');
     });
 
+    Route::prefix('personas')->group(function () {
+        Route::get('/', [PersonController::class , 'index'])->name('person.index');
+        Route::post('/equipo', [PersonController::class, 'equipo'])->name('person.equipo');
+        Route::post('/crearIntegrante', [LawyerController::class, 'crearIntegrante'])->name('lawyer.crearIntegrante');
+        Route::post('/detallePersona', [PersonController::class, 'detallePersona'])->name('person.detallePersona');
+    });
+
+
     // Demandantes
     Route::prefix('demandante')->group(function () {
-        Route::post('/', 'App\Http\Controllers\PersonController@index')->name('demandante.index');
+        Route::get('/', [PersonController::class , 'index'])->name('demandante.index');
         Route::get('/detalledemandante/{doc}', 'App\Http\Controllers\PersonController@detalledemandante')->name('demandante.detalledemandante');
         Route::post('/expedientes', 'App\Http\Controllers\PersonController@traerexpedientes')->name('demandante.traerexpedientes');
         // Nuevas rutas para obtener información por documento
@@ -230,6 +249,11 @@ Route::middleware(['auth:api'])->group(function () {
     //Clientes
     Route::prefix('person')->group(function () {
         Route::get('/', 'App\Http\Controllers\PersonController@indexPersons')->name('person.index');
+    });
+
+    //Tipo de expedientes
+    Route::prefix('proceedingTypes')->group(function () {
+        Route::get('/', [ProceedingTypeController::class, 'index'])->name('proceedingTypes.index');
     });
 
     //Observation
