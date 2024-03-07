@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\History;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -103,6 +104,11 @@ class HistoryController extends Controller
         } catch (Exception $e) {
             return ['state' => 1, 'exception' => (string) $e];
         }
+    }
+
+    protected function showPerson(Request $request){
+        $history = History::where('per_id', $request->per_id)->get();
+        return response()->json(['data' => $history], 200);
     }
 
 }

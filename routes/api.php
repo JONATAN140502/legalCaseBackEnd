@@ -130,6 +130,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('/', 'App\Http\Controllers\HistoryController@index')->name('history.index');
         Route::post('/store', 'App\Http\Controllers\HistoryController@store')->name('history.store');
         Route::get('data/{doc}', 'App\Http\Controllers\HistoryController@data')->name('history.data');
+        Route::post('/showPerson', 'App\Http\Controllers\HistoryController@showPerson')->name('history.showPerson');
     });
 
     // Historial de Pagos
