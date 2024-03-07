@@ -45,7 +45,8 @@ return [
         ],
         'public_server' => [
             'driver' => 'local',
-            'root'   => base_path() .'/../sisgefiles/',
+            // 'root'   => base_path() .'/../sisgefiles/',
+            'root'   => base_path() .'/../../sisgefiles/',
         ],
         's3' => [
             'driver' => 's3',

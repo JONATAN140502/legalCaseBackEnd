@@ -188,7 +188,8 @@ class ProceedingController extends Controller
             // actualizar o crear costos
             if (
                 $request->exp['exp_estado_proceso'] == 'EN EJECUCION' ||
-                $request->exp['exp_estado_proceso'] == 'ARCHIVADO'
+                $request->exp['exp_estado_proceso'] == 'ARCHIVADO' ||
+                $request->tipo==3
             ) {
                 $costo = \App\Models\ExecutionAmount::updateOrCreate(
                     ['exp_id' => strtoupper(trim($exp->exp_id))],
@@ -341,7 +342,7 @@ class ProceedingController extends Controller
             // actualizar o crear costos
             if (
                 $request->expediente['exp_estado_proceso'] == 'EN EJECUCION' ||
-                $request->expediente['exp_estado_proceso'] == 'ARCHIVADO'
+                $request->expediente['exp_estado_proceso'] == 'ARCHIVADO'                              
             ) {
                 $costo = \App\Models\ExecutionAmount::updateOrCreate(
                     ['exp_id' => strtoupper(trim($request->expediente['exp_id']))],
@@ -433,6 +434,7 @@ class ProceedingController extends Controller
             'pretension',
             'pretension',
             'procesal.persona',
+            'abogado.persona'
         )
             ->find($id);
 
@@ -447,6 +449,7 @@ class ProceedingController extends Controller
 
         $dataGeneral = [
             'exp_id' => $proceeding->exp_id,
+            'abo_id'=>$proceeding->abo_id,
             'exp_numero' => $proceeding->exp_numero,
             'exp_juzgado' => $proceeding->juzgado->co_nombre,
             'exp_distrito_judicial' => $proceeding->distritoJudicial->judis_nombre,
@@ -455,9 +458,10 @@ class ProceedingController extends Controller
             'exp_materia' => $proceeding->materia->mat_nombre,
             'exp_pretension' => optional($proceeding->pretension)->pre_nombre,
             'exp_monto_pretension' => $proceeding->exp_monto_pretencion,
-            'exp_estado' => $proceeding->exp_estado_proceso
+            'exp_estado' => $proceeding->exp_estado_proceso,
+            'abogado'=>$proceeding->abogado->persona?$this->getabogado($proceeding):"Sin Abogado",
         ];
-
+            
         $dataProcesal = $this->formatProcesalData($proceeding->procesal);
 
         // Traer archivos
@@ -745,7 +749,14 @@ class ProceedingController extends Controller
 
         return "$nombres $apellidoPaterno $apellidoMaterno";
     }
+    public function getabogado($audiencia)
+    {
+        $apellidoPaterno = ucwords(strtolower($audiencia->abogado->persona->nat_apellido_paterno));
+        $apellidoMaterno = ucwords(strtolower($audiencia->abogado->persona->nat_apellido_materno));
+        $nombres = ucwords(strtolower($audiencia->abogado->persona->nat_nombres));
 
+        return "$nombres $apellidoPaterno $apellidoMaterno";
+    }
     protected function alertas(Request $request)
     {
         try {

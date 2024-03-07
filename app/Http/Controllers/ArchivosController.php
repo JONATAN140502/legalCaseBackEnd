@@ -53,7 +53,11 @@ class ArchivosController extends Controller
     
             // Almacena el archivo en el disco 'public_server'
             Storage::disk('public_server')->put($doc_file, file_get_contents($archivo));
-
+            if($request->doc_tipo=='EJE'){
+              $fecha=date('Y-m-d');
+            }else{
+               $fecha= $request->fecha;
+            }
             // Guardar datos en la base de datos
             $documento = LegalDocument::create([
                 'doc_nombre' => $original,
@@ -62,6 +66,7 @@ class ArchivosController extends Controller
                 // 'doc_ruta_archivo' => "public/files/{$directorio}/{$nombreArchivo}",
                 'doc_ruta_archivo' =>$doc_file,
                 'exp_id' => $request->exp_id,
+                'fecha'=>$fecha
             ]);
 
             // Recupera los datos recién almacenados en la base de datos

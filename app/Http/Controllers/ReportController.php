@@ -386,6 +386,7 @@ class ReportController extends Controller
         ]);
             $proceedings = \App\Models\Proceeding::orderBy('created_at', 'DESC')
             ->where('exp_materia', $request->exp_materia)
+            ->whereIn('exp_estado_proceso',['EN TRAMITE','EN EJECUCION'])
             ->with('procesal.persona', 'pretension', 'materia','specialty')
             ->get();
             $formattedData = [];
@@ -437,6 +438,7 @@ class ReportController extends Controller
             ->with('persona')->first();
             $proceedings = \App\Models\Proceeding::orderBy('created_at', 'DESC')
             ->where('abo_id', $request->abo_id)
+            ->whereIn('exp_estado_proceso',['EN TRAMITE','EN EJECUCION'])
             ->with('procesal.persona', 'pretension', 'materia','specialty')
             ->get();
             $formattedData = [];
