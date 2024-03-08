@@ -278,6 +278,8 @@ class ReportController extends Controller
             ]);
             $proceedings = \App\Models\Proceeding::orderBy('created_at', 'DESC')
             ->with('procesal.persona', 'pretension', 'materia','specialty')
+            ->whereIn('exp_estado_proceso',['EN TRAMITE','EN EJECUCION']
+            )
             ->get();
 
          $formattedData = [];
