@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Uuid;
 use PDF;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Collection;
 use App\Http\Resources\{
     LawyerResource
 };
@@ -774,12 +775,40 @@ class ReportController extends Controller
             ->groupBy(DB::raw('YEAR(exp_fecha_inicio)'))
             ->orderBy(DB::raw('YEAR(exp_fecha_inicio)'))
             ->get();
-        // return response()->json(['state' => 0, 'data' => $data], 200);
+        //  return response()->json(['state' => 0, 'data' => $data], 200);
        
         return \PDF::loadView('graficodebarras', compact('data'))
         ->download();
     
     }
+    public function contarExpedientesPorAboTipo()
+{
+    $data1 =\App\Models\Proceeding::selectRaw('abo_id, COUNT(*) as cantidad')
+        ->groupBy('abo_id')
+        ->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])
+        ->get();
+     $data = $data1->map(function ($abo) {
+        $abogado = \App\Models\Lawyer::find($abo->abo_id);
+        if ($abogado) {
+            $nombreAbogado = $abogado->persona->nat_apellido_paterno . ' ' . $abogado->persona->nat_apellido_materno . ' ' . $abogado->persona->nat_nombres;
+            
+            return [
+                'name' => $nombreAbogado,
+                'cantidad' => $abo->cantidad,
+            ];
+        }
+        return null;
+     })->filter();
+     $labels = json_encode($data->pluck('name')->toArray(), JSON_UNESCAPED_UNICODE);
+     $values = $data->pluck('cantidad')->implode(',');
+     $chartUrl = "https://quickchart.io/chart?c={type:'pie',data:{
+         labels: {$labels},
+         datasets: [{data: [{$values}]}]
+     }}";
+
+     $pdf = PDF::loadView('graficodetorta', compact('chartUrl'));
+     return $pdf->download();
+     }
        //formatear los procesales
        protected function formatProcesalData($procesal)
        {

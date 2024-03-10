@@ -18,8 +18,11 @@ use App\Http\Controllers\FiscaliaController;
 Route::prefix('/user')->group(function () {
     Route::post('/login', 'App\Http\Controllers\LoginController@login');
 });
+
+Route::get('/pdf', 'App\Http\Controllers\ReportController@contarExpedientesPorAboTipo');
+
+//Rutas protegidas por autenticación
 Route::middleware(['auth:api'])->group(function () {
-    // Departamentos
     Route::prefix('department')->group(function () {
         Route::get('/', [DepartmentController::class, 'index'])->name('department.index');
         Route::get('/{id}/show', [DepartmentController::class, 'show'])->name('department.show');
@@ -162,6 +165,8 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('/pdffechas', 'App\Http\Controllers\ReportController@pdffechas')->name('reportes.pdffechas');
         Route::get('/pdfdistrito', 'App\Http\Controllers\ReportController@pdfdistrito')->name('reportes.pdfdistrito');
         Route::get('/pdfbarras', 'App\Http\Controllers\ReportController@contarExpedientesPorAnio')->name('reportes.contarExpedientesPorAnio');
+        Route::get('/abocantidad', 'App\Http\Controllers\ReportController@contarExpedientesPorAboTipo')->name('reportes.contarExpedientesPorAboTipo');
+    
     });
 
     // Audiencias
