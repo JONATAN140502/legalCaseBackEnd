@@ -801,10 +801,38 @@ class ReportController extends Controller
      })->filter();
      $labels = json_encode($data->pluck('name')->toArray(), JSON_UNESCAPED_UNICODE);
      $values = $data->pluck('cantidad')->implode(',');
-     $chartUrl = "https://quickchart.io/chart?c={type:'pie',data:{
-         labels: {$labels},
-         datasets: [{data: [{$values}]}]
-     }}";
+     $chartUrl = "https://quickchart.io/chart?c={
+        type: 'pie',
+        data: {
+          labels:  {$labels},
+          datasets: [
+            {
+              data: [{$values}],
+              backgroundColor: [
+                'red',
+                'blue',
+                'green',
+                'orange',
+                'purple',
+                'yellow',
+                'pink',
+                'cyan'
+              ],
+            },
+          ]
+        },
+        options: {
+          plugins: {
+            datalabels: {
+              color: 'black',
+              font: {
+                weight: 'bold',
+                family: 'Arial'
+              }
+            }
+          }
+        }
+      }";
 
      $pdf = PDF::loadView('graficodetorta', compact('chartUrl'));
      return $pdf->download();
