@@ -263,7 +263,7 @@ class PersonController extends Controller
 
         $expedientes = [];
         foreach ($procesales as $procesal) {
-            $expediente = Proceeding::where('exp_id', $procesal->exp_id)->with('pretension', 'materia',)->first();
+            $expediente = Proceeding::where('exp_id', $procesal->exp_id)->with('pretension', 'materia','type')->first();
             $expedientes[] = [
                 'exp_id' => $expediente->exp_id,
                 'exp_numero' => $expediente->exp_numero,
@@ -273,7 +273,9 @@ class PersonController extends Controller
                 'creacion' => $expediente->created_at,
                 'multiple' => $expediente->multiple,
                 'estado' => ucwords(strtolower($expediente->exp_estado_proceso)),
+                'tipo'=>ucwords(strtolower($expediente->type->name))
             ];
+            
         }
 
         $direccion = Address::where('per_id', $person->per_id)

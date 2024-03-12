@@ -77,4 +77,7 @@ class Proceeding extends Model
     public function proceedingTypes(){
         return $this->belongsTo(ProceedingTypes::class, 'exp_id');
     }
+    public function type(){
+        return $this->belongsTo(ProceedingTypes::class, 'type_id','id');
+    }
 }
