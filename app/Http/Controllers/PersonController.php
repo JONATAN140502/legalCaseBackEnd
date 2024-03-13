@@ -269,7 +269,7 @@ class PersonController extends Controller
                 'exp_numero' => $expediente->exp_numero,
                 'exp_fecha_inicio' => $expediente->exp_fecha_inicio,
                 'pretension' => $expediente->pretension->pre_nombre,
-                'materia' => $expediente->materia->mat_nombre,
+                 'materia' => $expediente->materia->mat_nombre??"",
                 'creacion' => $expediente->created_at,
                 'multiple' => $expediente->multiple,
                 'estado' => ucwords(strtolower($expediente->exp_estado_proceso)),
