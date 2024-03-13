@@ -19,11 +19,15 @@ class ProceedingController extends Controller
         $this->middleware('auth');
     }
 
+    const TRAMITE = 'EN TRAMITE';
+    const EJECUCION = 'EN EJECUCION';
+    const ARCHIVADO = 'ARCHIVADO';
+    const INVESTIGACION = 'EN INVESTIGACION';
+
     protected function index()
     {
-        $procedings = \App\Models\Proceeding::orderBy('created_at', 'DESC')
-            ->whereIn('exp_estado_proceso', ['EN TRAMITE', 
-            'EN EJECUCION','EN INVESTIGACION'])
+        $procedings = Proceeding::latest()
+            ->whereIn('exp_estado_proceso', [self::TRAMITE, self::EJECUCION, self::INVESTIGACION])
             ->with('procesal.persona', 'pretension', 'materia',)
             ->get();
 
@@ -538,7 +542,7 @@ class ProceedingController extends Controller
     protected function take()
     {
         $proceedings = \App\Models\Proceeding::latest('created_at')
-            ->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])
+            ->whereIn('exp_estado_proceso', [self::TRAMITE, self::EJECUCION])
             ->with('procesal.persona', 'pretension', 'materia')
             ->take(5)
             ->get();
@@ -567,7 +571,7 @@ class ProceedingController extends Controller
     {
         $expId = $request->exp_id;
         $proceeding = \App\Models\Proceeding::orderBy('created_at', 'DESC')
-            ->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION', 'ARCHIVADO'])
+            ->whereIn('exp_estado_proceso', [self::TRAMITE, self::EJECUCION, self::ARCHIVADO])
             ->with('procesal.persona', 'juzgado')
             ->find($expId);
 
