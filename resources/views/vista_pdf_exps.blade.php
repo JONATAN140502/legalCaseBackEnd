@@ -98,7 +98,7 @@
                     @if($expediente['tipo_persona'] === 'natural')
                         {{ ucwords(strtolower($expediente['nombres'] ?? '')) . ' ' . ucwords(strtolower($expediente['apellido_paterno'] ?? '')) . ' ' . ucwords(strtolower($expediente['apellido_materno'] ?? '')) }}
                     @else
-                        {{ ucwords(strtolower($expediente['razon_social'] ?? '')) }}
+                        {{$expediente['razon_social'] ?? ''}}
                     @endif
                 @else
                    UNPRG
@@ -109,7 +109,7 @@
                     @if($expediente['tipo_persona'] === 'natural')
                         {{ ucwords(strtolower($expediente['nombres'] ?? '')) . ' ' . ucwords(strtolower($expediente['apellido_paterno'] ?? '')) . ' ' . ucwords(strtolower($expediente['apellido_materno'] ?? '')) }}
                     @else
-                        {{ ucwords(strtolower($expediente['razon_social'] ?? '')) }}
+                        {{ $expediente['razon_social'] ?? '' }}
                     @endif
                 @else
                    UNPRG

@@ -30,7 +30,6 @@ class ProceedingController extends Controller
             ->whereIn('exp_estado_proceso', [self::TRAMITE, self::EJECUCION, self::INVESTIGACION])
             ->with('procesal.persona', 'pretension', 'materia',)
             ->get();
-
         $formattedData = [];
         foreach ($procedings as $proceeding) {
             $processedProcesals = $this->formatProcesalData($proceeding->procesal);
@@ -622,7 +621,7 @@ class ProceedingController extends Controller
             } else {
                 $data = array_merge($data, [
                     'ruc' => $procesalItem->persona->jur_ruc,
-                    'razon_social' => ucwords(strtolower($procesalItem->persona->jur_razon_social)),
+                    'razon_social' => $procesalItem->persona->jur_razon_social,
                     'telefono' => $procesalItem->persona->jur_telefono,
                     'correo' => strtolower($procesalItem->persona->jur_correo),
                     'condicion' => strtolower($procesalItem->persona->per_condicion),
