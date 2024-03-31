@@ -260,5 +260,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::prefix('observation')->group(function () {
         Route::post('/create', 'App\Http\Controllers\ObservationController@create')->name('observation.create');
         Route::put('/update', 'App\Http\Controllers\ObservationController@update')->name('observation.update');
+        Route::put('/derivative', 'App\Http\Controllers\ObservationController@derivative')->name('observation.derivative');
+        Route::delete('/destroy/{id}', 'App\Http\Controllers\ObservationController@destroy')->name('observation.destroy');
     });
 });

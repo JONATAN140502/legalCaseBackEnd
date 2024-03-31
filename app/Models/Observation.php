@@ -16,6 +16,7 @@ class Observation extends Model
         'obs_derivative',
         'obs_state',
         'obs_tra_id',
+        'obs_answer'
     ];
     protected $dates = ['created_at', 'updated_at', 'deleted_at'];
 
