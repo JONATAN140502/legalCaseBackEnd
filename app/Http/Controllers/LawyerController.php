@@ -24,6 +24,8 @@ class LawyerController extends Controller
         $this->middleware('auth');
     }
 
+    const TRAMITE = 'EN TRAMITE';
+    const EJECUCION = 'EN EJECUCION';
     //Obtener todos los datos
     protected function index(Request $request)
     {
@@ -204,16 +206,16 @@ class LawyerController extends Controller
 
     protected function expedientes(Request $request)
     {
-        $procedings = \App\Models\Proceeding::orderBy('created_at', 'DESC')
-            ->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])
+        $procedings = Proceeding::latest()
+            ->whereIn('exp_estado_proceso', [self::TRAMITE, self::EJECUCION])
             ->where('abo_id', $request->abo_id)
             ->with('procesal.persona', 'pretension', 'materia')
             ->get();
 
-        $formattedData = [];
+        $formatted = [];
         foreach ($procedings as $proceeding) {
             $processedProcesals = $this->formatProcesalData($proceeding->procesal);
-            $commonData = [
+            $common = [
                 'exp_id' => $proceeding->exp_id,
                 'numero' => $proceeding->exp_numero,
                 'fecha_inicio' => $proceeding->exp_fecha_inicio,
@@ -223,11 +225,14 @@ class LawyerController extends Controller
                 'estado_proceso' => ucwords(strtolower($proceeding->exp_estado_proceso)),
                 'multiple' => $proceeding->multiple,
                 'procesal' => $processedProcesals,
+                'creacion' => $proceeding->created_at,
             ];
-            $formattedData[] = $commonData;
+            $formatted[] = $common;
         }
 
-        return response()->json(['data' => $formattedData], 200);
+        $total = count($procedings);
+
+        return response()->json(['total' => $total, 'data' => $formatted], 200);
     }
 
     protected function alertas(Request $request)
@@ -236,7 +241,7 @@ class LawyerController extends Controller
             \DB::beginTransaction();
             $today = Carbon::now('America/Lima')->startOfDay();
             $expedientes = Proceeding::where('abo_id', $request->abo_id)
-                ->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])
+                ->whereIn('exp_estado_proceso', [self::TRAMITE, self::EJECUCION])
                 ->get();
             $alertas = collect();
             foreach ($expedientes as $expediente) {
@@ -272,7 +277,7 @@ class LawyerController extends Controller
             \DB::beginTransaction();
             $today = Carbon::now('America/Lima')->startOfDay();
             $expedientes = Proceeding::where('abo_id', $request->abo_id)
-                ->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])
+                ->whereIn('exp_estado_proceso', [self::TRAMITE, self::EJECUCION])
                 ->get();
 
             $audienciasFaltantes = collect();
@@ -289,7 +294,7 @@ class LawyerController extends Controller
                     $audienciasFaltantes->push([
                         'au_fecha' =>  $fechaAudiencia->toDateString(),
                         'au_hora' => $audiencia->au_hora,
-                        'fecha' => $audiencia->au_fecha->format('d-m-Y'),
+                        'fecha' => $fechaAudiencia->format('d-m-Y'),
                         'au_lugar' => $audiencia->au_lugar,
                         'au_detalles' => $audiencia->au_detalles,
                         'porcentaje' => $porcentaje,
@@ -310,31 +315,31 @@ class LawyerController extends Controller
     {
         try {
             $i = 0;
-    
+
             $expedientes = \App\Models\Proceeding::where('type_id', 1)
-                ->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])
+                ->whereIn('exp_estado_proceso', [self::TRAMITE, self::EJECUCION])
                 ->get();
-            $abo=\App\Models\Lawyer::where('abo_id',$request->abogado_asignado)->first();
-    
+            $abo = \App\Models\Lawyer::where('abo_id', $request->abogado_asignado)->first();
+
             foreach ($expedientes as $expediente) {
                 $primerProcesal = $expediente->procesal()->orderBy('proc_id')->first();
                 $apellidoPaterno = null;
                 $jur_razon_social = null;
-    
+
                 if ($primerProcesal->tipo_persona == 'NATURAL') {
                     $apellidoPaterno = \App\Models\Person::find($primerProcesal->persona->per_id)
-                    ->nat_apellido_paterno;
+                        ->nat_apellido_paterno;
                 } else {
                     $jur_razon_social = \App\Models\Person::find($primerProcesal->persona->per_id)
-                    ->jur_razon_social;
+                        ->jur_razon_social;
                 }
-    
+
                 $letrasSeleccionadas = $request->letras_selecionadas;
-    
+
                 foreach ($letrasSeleccionadas as $letra) {
                     // Obtener la longitud de la letra
                     $tam = strlen($letra);
-    
+
                     // Verificar si la letra seleccionada coincide con los primeros caracteres del apellido o razón social
                     if (
                         (strtoupper(substr($apellidoPaterno, 0, $tam)) == strtoupper($letra)) ||
@@ -347,12 +352,12 @@ class LawyerController extends Controller
                 }
             }
 
-    
+
             // Realizar la transacción de la base de datos después del bucle foreach
             \DB::beginTransaction();
 
-           $abo->abo_carga_laboral=$abo->abo_carga_laboral+$i;
-           $abo->save();
+            $abo->abo_carga_laboral = $abo->abo_carga_laboral + $i;
+            $abo->save();
 
             \App\Models\Audit::create([
                 'accion' => 'Cambio de abogado a exp. con letra ',
@@ -361,14 +366,14 @@ class LawyerController extends Controller
                 'user_id' => \Auth::user()->id,
             ]);
             \DB::commit();
-    
+
             return response()->json(['cantidad' => $i, 'state' => 0], 200);
         } catch (\Exception $e) {
             // Manejar cualquier error
             return response()->json(['error' => $e->getMessage(), 'state' => 1], 500);
         }
     }
-    
+
     protected function formatProcesalData($procesal)
     {
         $processedProcesals = [];
@@ -472,7 +477,6 @@ class LawyerController extends Controller
             'nat_correo' => strtolower($request->input('nat_correo')),
             'per_condicion' => strtoupper($request->input('per_condicion')),
         ]);
-
     }
 
     private function crearUsuario(Request $request, $personaId)

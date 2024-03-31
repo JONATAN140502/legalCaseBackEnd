@@ -15,7 +15,8 @@ class LegalDocument extends Model
         'doc_tipo',
         'doc_desciprcion',
         'doc_ruta_archivo',
-        'exp_id'
+        'exp_id',
+        'fecha',
     ];
     protected $dates = ['created_at', 'updated_at', 'deleted_at'];
     public function proceeding()

@@ -256,47 +256,40 @@ class PersonController extends Controller
     //detalles de la persona del equipo
     protected function detallePersona(Request $request)
     {
-        $tipo_persona = null;
-        $idPersona = $request->per_id;
+        $person = Person::where('per_id', $request->per_id)->first();
 
-        $person = Person::where('per_id', $idPersona)->first();
-        if ($person->nat_dni != null) {
-            $tipo_persona = 'NATURAL';
-        } else {
-            $tipo_persona = 'JURIDICA';
+        $procesales = [];
+        $procesales = Procesal::where('per_id', $person->per_id)->get();
+
+        $expedientes = [];
+        foreach ($procesales as $procesal) {
+            $expediente = Proceeding::where('exp_id', $procesal->exp_id)->with('pretension', 'materia','type')->first();
+            $expedientes[] = [
+                'exp_id' => $expediente->exp_id,
+                'exp_numero' => $expediente->exp_numero,
+                'exp_fecha_inicio' => $expediente->exp_fecha_inicio,
+                'pretension' => $expediente->pretension->pre_nombre,
+                 'materia' => $expediente->materia->mat_nombre??"",
+                'creacion' => $expediente->created_at,
+                'multiple' => $expediente->multiple,
+                'estado' => ucwords(strtolower($expediente->exp_estado_proceso)),
+                'tipo'=>ucwords(strtolower($expediente->type->name))
+            ];
+            
         }
 
-        if (!$person) {
-            return response()->json(['state' => 1, 'message' => 'Persona no encontrada'], 404);
-        }
-
-        $procesal = Procesal::where('per_id', $person->per_id)
-            ->orderBy('created_at', 'DESC')
-            ->first();
-
-        if (!$procesal) {
-            return response()->json(['state' => 1, 'message' => 'Procesal no encontrado para la persona'], 404);
-        }
-
-        $expediente = $procesal->expediente;
         $direccion = Address::where('per_id', $person->per_id)
             ->with('district.province.departament')
             ->first();
 
-        if (!$expediente) {
-            return response()->json(['state' => 1, 'message' => 'Expediente no encontrado para el proceso'], 404);
-        }
+        $tipo_persona = $procesal->tipo_persona;
 
-        // Construye la respuesta con la estructura deseada
         $data = [
             'data' => [
-                'expediente' => [
-                    'exp_id' => $expediente->exp_id,
-                    'exp_numero' => $expediente->exp_numero,
-                    'multiple' => $expediente->multiple,
-                ],
+                'expedientes' => $expedientes,
                 'persona' => [
-                    'tipo_persona' => $tipo_persona,
+                    'tipo_procesal' => ucwords(strtolower($procesal->tipo_procesal)),
+                    'tipo_persona' => ucwords(strtolower($tipo_persona)),
                     'nat_dni' => $tipo_persona === 'NATURAL' ? $person->nat_dni : null,
                     'nat_apellido_paterno' => $tipo_persona === 'NATURAL' ? ucwords(strtolower($person->nat_apellido_paterno)) : null,
                     'nat_apellido_materno' => $tipo_persona === 'NATURAL' ? ucwords(strtolower($person->nat_apellido_materno)) : null,
@@ -344,7 +337,11 @@ class PersonController extends Controller
             return response()->json(['state' => 1, 'message' => 'Procesal no encontrado para la persona'], 404);
         }
 
-        $expediente = $procesal->expediente;
+        $exp_id = $procesal->expediente->exp_id;
+
+        $expediente = Proceeding::where('exp_id', $exp_id)
+            ->with('pretension', 'materia')
+            ->get();
         $direccion = Address::where('per_id', $person->per_id)
             ->with('district.province.departament')
             ->first();
@@ -359,6 +356,10 @@ class PersonController extends Controller
                 'expediente' => [
                     'exp_id' => $expediente->exp_id,
                     'exp_numero' => $expediente->exp_numero,
+                    'exp_fecha_inicio' => $expediente->exp_fecha_inicio,
+                    'pretension' => $expediente->pretension->pre_nombre,
+                    'materia' => $expediente->materia->mat_nombre,
+                    'creacion' => $expediente->created_at->format('d/m/Y'),
                     'multiple' => $expediente->multiple,
                 ],
                 'persona' => [
@@ -490,13 +491,13 @@ class PersonController extends Controller
     }
 
 
-    protected function getPersonByDocument($doc)
+    protected function getPersonByDocument($id)
     {
-        if (strlen($doc) === 8) {
-            $persona = Person::where('nat_dni', $doc)->first();
+        if (strlen($id) === 8) {
+            $persona = Person::where('nat_dni', $id)->first();
             return $persona ? Procesal::where('per_id', $persona->per_id)->first() : null;
         } else {
-            $persona = Person::where('jur_ruc', $doc)->first();
+            $persona = Person::where('jur_ruc', $id)->first();
             return $persona ? Procesal::where('per_id', $persona->per_id)->first() : null;
         }
     }

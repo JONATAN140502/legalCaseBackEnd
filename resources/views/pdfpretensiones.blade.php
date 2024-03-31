@@ -114,7 +114,17 @@
                     <td>
                         @if($tipoProcesal === 'DEMANDANTE')
                             @if($multiple)
-                                Múltiples
+                            @foreach($expediente['procesal'] as $proc)
+                                        
+                                        @if($proc['tipo_persona'] === 'NATURAL')
+                                            *{{ucwords(strtolower($proc['nombres'] ?? '')) . ' 
+                                                ' . ucwords(strtolower($proc['apellido_paterno'] ?? '')) . ' 
+                                                ' . ucwords(strtolower($proc['apellido_materno'] ?? '')) }}
+                                        @else
+                                            *{{$proc['razon_social'] ?? '' }}
+                                        @endif
+                                    
+                                @endforeach 
                             @else
                                 @if($tipoPersona === 'NATURAL')
                                     {{ $nombres . ' ' . $apellidoPaterno . ' ' . $apellidoMaterno }}
@@ -129,7 +139,17 @@
                     <td>
                         @if($tipoProcesal !== 'DEMANDANTE')
                             @if($multiple)
-                                Múltiples
+                            @foreach($expediente['procesal'] as $proc)
+                                        
+                                        @if($proc['tipo_persona'] === 'NATURAL')
+                                            *{{ucwords(strtolower($proc['nombres'] ?? '')) . ' 
+                                                ' . ucwords(strtolower($proc['apellido_paterno'] ?? '')) . ' 
+                                                ' . ucwords(strtolower($proc['apellido_materno'] ?? '')) }}
+                                        @else
+                                            *{{$proc['razon_social'] ?? '' }}
+                                        @endif
+                                    
+                                @endforeach 
                             @else
                                 @if($tipoPersona === 'NATURAL')
                                     {{ $nombres . ' ' . $apellidoPaterno . ' ' . $apellidoMaterno }}

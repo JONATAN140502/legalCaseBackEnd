@@ -123,7 +123,7 @@
                                             ' . ucwords(strtolower($expediente['procesal'][0]['apellido_paterno'] ?? '')) . ' 
                                             ' . ucwords(strtolower($expediente['procesal'][0]['apellido_materno'] ?? '')) }}
                                     @else
-                                        {{ ucwords(strtolower($expediente['procesal'][0]['razon_social'] ?? '')) }}
+                                        {{ $expediente['procesal'][0]['razon_social'] ?? ''}}
                                     @endif
                                 @else
                                     @foreach($expediente['procesal'] as $proc)
@@ -133,7 +133,7 @@
                                                     ' . ucwords(strtolower($proc['apellido_paterno'] ?? '')) . ' 
                                                     ' . ucwords(strtolower($proc['apellido_materno'] ?? '')) }}
                                             @else
-                                               *{{ ucwords(strtolower($proc['razon_social'] ?? '')) }}
+                                               *{{ $proc['razon_social'] ?? ''}}
                                             @endif
                                     
                                     @endforeach
@@ -150,7 +150,7 @@
                                             ' . ucwords(strtolower($expediente['procesal'][0]['apellido_paterno'] ?? '')) . ' 
                                             ' . ucwords(strtolower($expediente['procesal'][0]['apellido_materno'] ?? '')) }}
                                     @else
-                                        {{ ucwords(strtolower($expediente['procesal'][0]['razon_social'] ?? '')) }}
+                                        {{ $expediente['procesal'][0]['razon_social'] ?? '' }}
                                     @endif
                                 @else
                                     @foreach($expediente['procesal'] as $proc)
@@ -160,7 +160,7 @@
                                                     ' . ucwords(strtolower($proc['apellido_paterno'] ?? '')) . ' 
                                                     ' . ucwords(strtolower($proc['apellido_materno'] ?? '')) }}
                                             @else
-                                                *{{ucwords(strtolower($proc['razon_social'] ?? '')) }}
+                                                *{{$proc['razon_social'] ?? '' }}
                                             @endif
                                         
                                     @endforeach 
