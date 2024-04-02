@@ -206,7 +206,56 @@ class ReportController extends Controller
             return \PDF::loadView('pdfExpedienteTramite', compact('data1', 'data2', 'data3', 'data4', 'data5', 'tipo'))
                     ->download();
             
- }
+    }
+    protected function pdfexparchivados(Request $request)
+    {
+        $report = \App\Models\Report::create([
+            'rep_fecha_generacion' => now()->setTimezone('America/Lima'),
+            'rep_tipo' => 'REPORTE EXPEDIENTE EN TRAMITE/AUTOMATIZADO',
+            'usu_id' => \Auth::user()->id,
+        ]);
+
+        \App\Models\Audit::create([
+            'accion'=>'GERENACION DE REPORTE',
+           'model'=>'\App\Models\Report',
+            'model_id'=>\Auth::user()->id,
+            'user_id'=>\Auth::user()->id,
+        ]);
+            $proceedings = \App\Models\Proceeding::orderBy('created_at', 'DESC')
+            ->where('exp_estado_proceso','ARCHIVADO')
+            ->with('procesal.persona', 'pretension', 'materia','specialty')
+            ->get();
+
+        $formattedData = [];
+        foreach ($proceedings as $proceeding) {
+            $processedProcesals = $this->formatProcesalData($proceeding->procesal);
+            $commonData = [
+                'exp_id' => $proceeding->exp_id,
+                'numero' => $proceeding->exp_numero,
+                'fecha_inicio' => date('d-m-Y', strtotime($proceeding->exp_fecha_inicio)),
+                'pretencion' => isset($proceeding->pretension->pre_nombre) ? $proceeding->pretension->pre_nombre : '-',
+                'materia' => isset($proceeding->materia->mat_nombre) ? $proceeding->materia->mat_nombre : '-',
+                'especialidad' => isset($proceeding->specialty->esp_nombre) ? $proceeding->specialty->esp_nombre : '-',
+                'monto_pretencion' => $proceeding->exp_monto_pretencion,
+                'estado_proceso' => ucwords(strtolower($proceeding->exp_estado_proceso)),
+                'multiple' => $proceeding->multiple,
+                'procesal' => $processedProcesals,
+            ];
+            $formattedData[] = $commonData;
+        }
+            $tipo=' Reporte de Expedientes Archivados';
+            $totalRegistros = count($formattedData);
+            $quinto = ceil($totalRegistros / 5);
+            $data1 = array_slice($formattedData, 0, $quinto);
+            $data2 = array_slice($formattedData, $quinto, $quinto);
+            $data3 = array_slice($formattedData, $quinto * 2, $quinto);
+            $data4 = array_slice($formattedData, $quinto * 3, $quinto);
+            $data5 = array_slice($formattedData, $quinto * 4, $quinto);
+            
+            return \PDF::loadView('pdfExpedienteTramite', compact('data1', 'data2', 'data3', 'data4', 'data5', 'tipo'))
+                    ->download();
+            
+    }
     protected function pdfexpejecucion(Request $request)
     {
        

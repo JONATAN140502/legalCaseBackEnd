@@ -150,7 +150,8 @@ Route::middleware(['auth:api'])->group(function () {
         Route::post('/distritos', 'App\Http\Controllers\ReportController@distritos')->name('reportes.distritos');
     });
     // Generacion de Reportes  pdf
-    Route::prefix('reportespfd')->group(function () {
+        Route::prefix('reportespfd')->group(function () {
+        Route::get('/pdfexparchivados', 'App\Http\Controllers\ReportController@pdfexparchivados')->name('reportes.pdfexptramite');
         Route::get('/pdfabogados', 'App\Http\Controllers\ReportController@pdfabogados')->name('reportes.pdfabogados');
         Route::get('/pdfexptramite', 'App\Http\Controllers\ReportController@pdfexptramite')->name('reportes.pdfexptramite');
         Route::get('/pdfexpejecucion', 'App\Http\Controllers\ReportController@pdfexpejecucion')->name('reportes.pdfexpejecucion');
