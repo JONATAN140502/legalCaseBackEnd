@@ -20,27 +20,6 @@ class ReportController extends Controller
      }
     protected function inicio(Request $request)
     {
-        $expTotal = \App\Models\Proceeding::whereIn('exp_estado_proceso',['EN TRAMITE','EN EJECUCION']
-        )->count();
-        
-        $expTotalEnTramite = \App\Models\Proceeding::where(
-            'exp_estado_proceso',
-            'EN TRAMITE'
-        )->count();
-        $expTotalEnEjecucion = \App\Models\Proceeding::where(
-            'exp_estado_proceso',
-            'EN EJECUCION'
-        )->count();
-        $demandantes = \App\Models\Procesal::
-        where(
-            'tipo_procesal',
-            'DEMANDANTE'
-        )->count();
-
-        return \response()->json([
-            'state' => 200, 'exptotal' => $expTotal, 'exptramite' => $expTotalEnTramite,
-            'demandante' => $demandantes, 'expejecucion' => $expTotalEnEjecucion
-        ], 200);
     }
     protected function inicioAdmin(Request $request)
     {
@@ -49,9 +28,22 @@ class ReportController extends Controller
                 $query->withTrashed();
             }, 'exp'])
             ->get();
-
+         $today=date("Y-m-d");  //hoy
+         $expTotal = \App\Models\Proceeding::whereIn('exp_estado_proceso',['EN TRAMITE',
+            'EN EJECUCION']
+            )->count();
+            
+        $alerts=\App\Models\Alert::where('ale_fecha_vencimiento','>=',$today)  
+              ->count();
+        $audiences = \App\Models\Audience::where('au_fecha','>=',$today)  
+              ->count(); 
+        $combinedData = [
+                'expTotal' => $expTotal,
+                'alerts' => $alerts,
+                'audiences' => $audiences
+            ];
         return response()->json([
-            'state' => 0, 'data' => $exp
+            'state' => 0, 'data' => $exp,'count'=>$combinedData
         ], 200);
     }
 
