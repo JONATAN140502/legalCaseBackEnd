@@ -58,6 +58,7 @@ class TradeController extends Controller
             $tra_matter = isset($request->tra_matter) ? ucfirst(trim($request->tra_matter)) : null;
             $tra_arrival_date = isset($request->tra_arrival_date) ? $request->tra_arrival_date : null;
             $tra_state_mp = isset($request->tra_state_mp) ? ucfirst($request->tra_state_mp) : null;
+            $tra_obs = isset($request->tra_obs) ? ucfirst($request->tra_obs) : null;
             $tra_state_law = isset($request->tra_state_law) ? ucfirst($request->tra_state_law) : null;
             $tra_ubication = isset($request->tra_ubication) ? strtoupper(trim($request->tra_ubication)) : null;
             $tra_are_id = isset($request->tra_are_id) ? $request->tra_are_id : null;
@@ -130,6 +131,7 @@ class TradeController extends Controller
                 }
                 ])->find($id);
             $persons = $trade->persons;
+            $observations = $trade->observations;
             return response()->json(['state' => 'success', 'trade' => $trade, 'persons'=>$persons], 200);
         } catch (QueryException $e) {
             $errorMessage = $e->getMessage();

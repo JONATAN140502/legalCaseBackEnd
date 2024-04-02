@@ -29,6 +29,7 @@ class Trade extends Model
         'tra_are_id',
         'tra_abo_id',
         'tra_ass_id',
+        'tra_obs'
     ];
 
     public function area()
