@@ -59,10 +59,6 @@ class LoginController extends Controller
             'user_id'=>Auth::user()->id,
         ]);
         
-        if($user->usu_rol=='ASISTENTE'){
-            $asistente = \App\Models\Assistant::where(
-                'per_id',$personaNatural->per_id)->first();
-        }
         return response()->json([
                 'user' => [
                     'id' => $user->id,
@@ -74,7 +70,6 @@ class LoginController extends Controller
                     'token' => $accessToken,
                     'datos' => $datosPersonaNatural,
                     'abo_id'=>$user->usu_rol=='ABOGADO' ?$abogado->abo_id:null,
-                    'ass_id'=>$user->usu_rol=='ASISTENTE' ?$asistente->ass_id:null,
                 ],
                 'state' => 200
             ], 200);
