@@ -61,7 +61,7 @@ class LawyerController extends Controller
         try {
             $lawyer = Lawyer::findOrFail($request->abo_id);
             $trades = $lawyer->trades()->with('area')->get();
-            return response()->json(['state' => 'success', 'data' => $trades], 200);
+            return response()->json(['state' => 'success', 'data' => $trades, 'lawyer' => $lawyer->persona], 200);
         } catch (QueryException $e) {
             $errorMessage = $e->getMessage();
             return response()->json(['state' => 'error', 'message' => 'Error de base de datos: ' . $errorMessage], 500);

@@ -53,6 +53,7 @@ class TradeController extends Controller
             $responsablesId = $request->responsablesId;
             $tra_abo_id = $request->tra_abo_id;
             $tra_pdf = isset($request->tra_pdf) ? $request->tra_pdf : null;
+            $anio = $request->anio;
             
             DB::beginTransaction();
             $trade = Trade::create([
@@ -68,6 +69,7 @@ class TradeController extends Controller
                 'tra_abo_id' => $tra_abo_id,
                 'tra_type_id' => $tra_type_id,
                 'tra_pdf' => $tra_pdf,
+                'anio' => $anio,
             ]);
             
             DB::commit();

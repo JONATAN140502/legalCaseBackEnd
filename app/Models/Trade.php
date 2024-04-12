@@ -26,7 +26,8 @@ class Trade extends Model
         'tra_pdf',
         'tra_are_id',
         'tra_abo_id',
-        'tra_type_id'
+        'tra_type_id',
+        'anio'
     ];
 
     public function area()
