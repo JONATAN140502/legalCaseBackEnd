@@ -24,6 +24,7 @@ class Person extends Model
         'nat_correo',
         'per_condicion',
         'tipo_procesal'
+        , 'fallecido'
     ];
     protected $dates = ['deleted_at'];
     public function procesal()

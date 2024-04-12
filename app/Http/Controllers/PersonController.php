@@ -550,4 +550,65 @@ class PersonController extends Controller
             return ['state' => '1', 'exception' => (string) $e];
         }
     }
+    public function añadirSucesor(Request $request)
+    {    
+        try {
+            DB::beginTransaction();
+            $personas = $request->Personas;
+        foreach ($personas as $persona) {
+            $person = null;
+                $person = \App\Models\Person::updateOrcreate(
+                    ['nat_dni' => strtoupper(trim($persona['nat_dni']))],
+                    [
+                        'nat_apellido_paterno' => strtoupper(trim($persona['nat_apellido_paterno'])),
+                        'nat_apellido_materno' => strtoupper(trim($persona['nat_apellido_materno'])),
+                        'nat_nombres' => strtoupper(trim($persona['nat_nombres'])),
+                        'nat_telefono' => strtoupper(trim($persona['nat_telefono'])),
+                        'nat_correo' => trim($persona['nat_correo']),
+                    ]
+                );
+        
+            $direccion = null;
+            $direccion = \App\Models\Address::updateOrCreate(
+                ['per_id' => $person->per_id],
+                [
+                    'dir_calle_av' => trim($persona['dir_calle_av']),
+                    'dis_id' => trim($persona['dis_id']),
+                    'pro_id' => trim($persona['pro_id']),
+                    'dep_id' => trim($persona['dep_id']),
+                ]
+            );
+            $procesal = null;
+            $procesal = \App\Models\Successor::updateOrCreate(
+                [
+                    'fallecido_id' =>$request->fallecido,
+                    'sucesor_id' => $person->per_id,
+                ]
+            );
+        }
+        $fallecido = \App\Models\Person::find($request->fallecido);
+        $fallecido->update([
+            'fallecido' => '1',
+        ]);
+        DB::commit();
+        return \response()->json(['state' => 0, 'data' => 'OK'], 200);
+    } catch (Exception $e) {
+        DB::rollback();
+        return ['state' => '1', 'exception' => (string) $e];
+    }
+    }
+    public function listarSucesor(Request $request)
+    {
+      $sucesror=\App\Models\Successor::
+       with('sucesor')
+      ->where('fallecido_id',$request->id)->get();
+
+      return response()->json(['data' => $sucesror]);
+    }
+    public function editarSucesor(Request $request)
+    {
+    }
+    public function eliminarSucesor(Request $request)
+    {
+    }
 }
