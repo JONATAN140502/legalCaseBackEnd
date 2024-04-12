@@ -14,6 +14,7 @@ use App\Http\Controllers\AudienceController;
 use App\Http\Controllers\PersonController;
 use App\Http\Controllers\ProceedingTypeController;
 use App\Http\Controllers\FiscaliaController;
+use App\Http\Controllers\TradeReportController;
 
 Route::prefix('/user')->group(function () {
     Route::post('/login', 'App\Http\Controllers\LoginController@login');
@@ -183,6 +184,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('/descargar', [ArchivosController::class, 'descargar'])->name('archivos.descargar');
         Route::post('/guardar', [ArchivosController::class, 'guardar'])->name('archivos.guardar');
         Route::post('/actualizar/eje', [ArchivosController::class, 'actualizarEje'])->name('archivos.actualizarEje)');
+        Route::post('/guardarArchivoAdm', 'App\Http\Controllers\ArchivosController@guardarArchivoAdm')->name('archivos.guardarArchivoAdm');
     });
     //llevar excel a la Bd
     Route::prefix('excel')->group(function () {
@@ -241,9 +243,15 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('/', 'App\Http\Controllers\AreaController@index')->name('area.index');
     });
 
+    //type_references
+    Route::prefix('type_reference')->group(function () {
+        Route::get('/', 'App\Http\Controllers\TypeReferenceController@index')->name('type_ref.index');
+    });
+
     //Oficio
     Route::prefix('trade')->group(function () {
         Route::get('/', 'App\Http\Controllers\TradeController@index')->name('trade.index');
+        Route::get('/nextTraNumber', 'App\Http\Controllers\TradeController@getNextTraNumber')->name('trade.nextTraNumber');
         Route::get('/{id}', 'App\Http\Controllers\TradeController@show')->name('trade.show');
         Route::post('/create', 'App\Http\Controllers\TradeController@create')->name('trade.create');
     });
@@ -265,11 +273,9 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('/', [ProceedingTypeController::class, 'index'])->name('proceedingTypes.index');
     });
 
-    //Observation
-    Route::prefix('observation')->group(function () {
-        Route::post('/create', 'App\Http\Controllers\ObservationController@create')->name('observation.create');
-        Route::put('/update', 'App\Http\Controllers\ObservationController@update')->name('observation.update');
-        Route::put('/derivative', 'App\Http\Controllers\ObservationController@derivative')->name('observation.derivative');
-        Route::delete('/destroy/{id}', 'App\Http\Controllers\ObservationController@destroy')->name('observation.destroy');
+    //Report
+    Route::prefix('report')->group(function () {
+        Route::post('/create', [TradeReportController::class, 'create'])->name('report.index');
     });
+
 });

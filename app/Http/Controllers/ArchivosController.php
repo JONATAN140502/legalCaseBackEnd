@@ -36,6 +36,30 @@ class ArchivosController extends Controller
             return response()->json(['error' => 'Error al descargar el archivo: ' . $e->getMessage()], 500);
         }
     }
+
+    public function guardarArchivoAdm(Request $request){
+        try{
+            $file = $request->file('file');
+            $number = $request->input('number');
+            $doc_tipo = $request->input('doc_tipo');
+
+            // Obtén la extensión del archivo
+            $extension = $file->getClientOriginalExtension();
+
+            // Construye la ruta del archivo
+            $doc_file = "{$doc_tipo}/{$number}.{$extension}";
+
+            // Almacena el archivo en el disco 'public'
+            Storage::disk('public')->put($doc_file, file_get_contents($file));
+
+            return response()->json([
+                'mensaje' => 'Archivo cargado exitosamente',
+            ]);
+        }catch (\Exception $e) {
+            return response()->json(['error' => 'Error al cargar el archivo: ' . $e->getMessage()], 500);
+        }
+    }
+
     public function guardar(Request $request)
     {
         try {
