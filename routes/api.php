@@ -14,6 +14,7 @@ use App\Http\Controllers\AudienceController;
 use App\Http\Controllers\PersonController;
 use App\Http\Controllers\ProceedingTypeController;
 use App\Http\Controllers\FiscaliaController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TradeReportController;
 
 Route::prefix('/user')->group(function () {
@@ -84,8 +85,8 @@ Route::middleware(['auth:api'])->group(function () {
         Route::put('/update', [InstanceController::class, 'update'])->name('Instance.update');
         Route::delete('/destroy/{id}', [InstanceController::class, 'destroy'])->name('Instance.destroy');
     });
-     //fiscalias
-     Route::prefix('fiscalia')->group(function () {
+    //fiscalias
+    Route::prefix('fiscalia')->group(function () {
         Route::post('/', [FiscaliaController::class, 'index'])->name('Fiscalia.index');
         Route::post('/show', [FiscaliaController::class, 'show'])->name('Fiscalia.show');
         Route::post('/store', [FiscaliaController::class, 'store'])->name('Fiscalia.store');
@@ -102,7 +103,7 @@ Route::middleware(['auth:api'])->group(function () {
     });
 
     Route::prefix('personas')->group(function () {
-        Route::get('/', [PersonController::class , 'index'])->name('person.index');
+        Route::get('/', [PersonController::class, 'index'])->name('person.index');
         Route::post('/equipo', [PersonController::class, 'equipo'])->name('person.equipo');
         Route::post('/crearIntegrante', [LawyerController::class, 'crearIntegrante'])->name('lawyer.crearIntegrante');
         Route::post('/detallePersona', [PersonController::class, 'detallePersona'])->name('person.detallePersona');
@@ -113,7 +114,7 @@ Route::middleware(['auth:api'])->group(function () {
 
     // Demandantes
     Route::prefix('demandante')->group(function () {
-        Route::get('/', [PersonController::class , 'index'])->name('demandante.index');
+        Route::get('/', [PersonController::class, 'index'])->name('demandante.index');
         Route::get('/detalledemandante/{doc}', 'App\Http\Controllers\PersonController@detalledemandante')->name('demandante.detalledemandante');
         Route::post('/expedientes', 'App\Http\Controllers\PersonController@traerexpedientes')->name('demandante.traerexpedientes');
         // Nuevas rutas para obtener información por documento
@@ -153,7 +154,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::post('/distritos', 'App\Http\Controllers\ReportController@distritos')->name('reportes.distritos');
     });
     // Generacion de Reportes  pdf
-        Route::prefix('reportespfd')->group(function () {
+    Route::prefix('reportespfd')->group(function () {
         Route::get('/pdfexparchivados', 'App\Http\Controllers\ReportController@pdfexparchivados')->name('reportes.pdfexptramite');
         Route::get('/pdfabogados', 'App\Http\Controllers\ReportController@pdfabogados')->name('reportes.pdfabogados');
         Route::get('/pdfexptramite', 'App\Http\Controllers\ReportController@pdfexptramite')->name('reportes.pdfexptramite');
@@ -170,7 +171,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('/pdfdistrito', 'App\Http\Controllers\ReportController@pdfdistrito')->name('reportes.pdfdistrito');
         Route::get('/pdfbarras', 'App\Http\Controllers\ReportController@contarExpedientesPorAnio')->name('reportes.contarExpedientesPorAnio');
         Route::get('/abocantidad', 'App\Http\Controllers\ReportController@contarExpedientesPorAboTipo')->name('reportes.contarExpedientesPorAboTipo');
-    
+        Route::get('/proceedingType', [ReportController::class, 'proceedingType'])->name('reportes.proceedingType');
     });
 
     // Audiencias
@@ -277,5 +278,4 @@ Route::middleware(['auth:api'])->group(function () {
     Route::prefix('report')->group(function () {
         Route::post('/create', [TradeReportController::class, 'create'])->name('report.index');
     });
-
 });
