@@ -45,6 +45,7 @@ class ProceedingController extends Controller
                 'tipo_exp'=>$proceeding->type_id,
                 'creacion' => $proceeding->created_at,
                 'procesal' => $processedProcesals,
+                'oficios' => $proceeding->officeProceedings->toArray(),
             ];
             $formattedData[] = $commonData;
         }
