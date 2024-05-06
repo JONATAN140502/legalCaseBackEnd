@@ -80,4 +80,9 @@ class Proceeding extends Model
     public function type(){
         return $this->belongsTo(ProceedingTypes::class, 'type_id','id');
     }
+
+    public function officeProceedings()
+    {
+    return $this->hasMany(OfficeProceeding::class, 'expediente_id', 'exp_id');
+    }
 }
