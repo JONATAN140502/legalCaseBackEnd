@@ -42,7 +42,7 @@ class ProceedingController extends Controller
                 'monto_pretencion' => $proceeding->exp_monto_pretencion,
                 'estado_proceso' => ucwords(strtolower($proceeding->exp_estado_proceso)),
                 'multiple' => $proceeding->multiple,
-                'tipo_exp'=>$proceeding->type_id,
+                'tipo_exp' => $proceeding->type_id,
                 'creacion' => $proceeding->created_at,
                 'procesal' => $processedProcesals,
                 'oficios' => $proceeding->officeProceedings->toArray(),
@@ -170,7 +170,7 @@ class ProceedingController extends Controller
             $exp_monto_pretencion = isset($request->exp['exp_monto_pretencion']) ? trim($request->exp['exp_monto_pretencion']) : null;
             $exp_estado_proceso = isset($request->exp['exp_estado_proceso']) ? trim($request->exp['exp_estado_proceso']) : null;
             $exp_juzgado = isset($request->exp['exp_juzgado']) ? strtoupper(trim($request->exp['exp_juzgado'])) : null;
-            $carpeta= isset($request->exp['carpetafiscal']) ? strtoupper(trim($request->exp['carpetafiscal'])) : null;
+            $carpeta = isset($request->exp['carpetafiscal']) ? strtoupper(trim($request->exp['carpetafiscal'])) : null;
 
             $exp = \App\Models\Proceeding::create([
                 'exp_numero' => $exp_numero,
@@ -185,7 +185,7 @@ class ProceedingController extends Controller
                 'exp_juzgado' => $exp_juzgado,
                 'multiple' => $multiple,
                 'abo_id' => $request->abo_id,
-                'carpeta_fiscal'=>$carpeta,
+                'carpeta_fiscal' => $carpeta,
                 'type_id' => $request->tipo
             ]);
 
@@ -193,7 +193,7 @@ class ProceedingController extends Controller
             if (
                 $request->exp['exp_estado_proceso'] == 'EN EJECUCION' ||
                 $request->exp['exp_estado_proceso'] == 'ARCHIVADO' ||
-                $request->tipo==3
+                $request->tipo == 3
             ) {
                 $costo = \App\Models\ExecutionAmount::updateOrCreate(
                     ['exp_id' => strtoupper(trim($exp->exp_id))],
@@ -346,7 +346,7 @@ class ProceedingController extends Controller
             // actualizar o crear costos
             if (
                 $request->expediente['exp_estado_proceso'] == 'EN EJECUCION' ||
-                $request->expediente['exp_estado_proceso'] == 'ARCHIVADO'                              
+                $request->expediente['exp_estado_proceso'] == 'ARCHIVADO'
             ) {
                 $costo = \App\Models\ExecutionAmount::updateOrCreate(
                     ['exp_id' => strtoupper(trim($request->expediente['exp_id']))],
@@ -438,7 +438,8 @@ class ProceedingController extends Controller
             'pretension',
             'pretension',
             'procesal.persona',
-            'abogado.persona'
+            'abogado.persona',
+            'officeProceedings'
         )
             ->find($id);
 
@@ -453,7 +454,7 @@ class ProceedingController extends Controller
 
         $dataGeneral = [
             'exp_id' => $proceeding->exp_id,
-            'abo_id'=>$proceeding->abo_id,
+            'abo_id' => $proceeding->abo_id,
             'exp_numero' => $proceeding->exp_numero,
             'exp_juzgado' => $proceeding->juzgado->co_nombre,
             'exp_distrito_judicial' => $proceeding->distritoJudicial->judis_nombre,
@@ -463,9 +464,9 @@ class ProceedingController extends Controller
             'exp_pretension' => optional($proceeding->pretension)->pre_nombre,
             'exp_monto_pretension' => $proceeding->exp_monto_pretencion,
             'exp_estado' => $proceeding->exp_estado_proceso,
-            'abogado'=>$proceeding->abogado->persona?$this->getabogado($proceeding):"Sin Abogado",
+            'abogado' => $proceeding->abogado->persona ? $this->getabogado($proceeding) : "Sin Abogado",
         ];
-            
+
         $dataProcesal = $this->formatProcesalData($proceeding->procesal);
 
         // Traer archivos
@@ -496,6 +497,7 @@ class ProceedingController extends Controller
             'procesales' => $dataProcesal,
             'eje' => $dataEje,
             'escritos' => $dataEscritos,
+            'office' => $proceeding->officeProceedings
         ], 200);
     }
 

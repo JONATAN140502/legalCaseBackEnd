@@ -27,42 +27,42 @@ class OfficeProceedingController extends Controller
     }
 
     public function insertOfficeProceeding(Request $request)
-{
-    // Obtener el año actual
-    $currentYear = date('Y');
+    {
+        // Obtener el año actual
+        $currentYear = date('Y');
 
-    // Obtener el último registro
-    $lastRecord = OfficeProceeding::latest()->first();
+        // Obtener el último registro
+        $lastRecord = OfficeProceeding::latest()->first();
 
-    // Obtener el año del último registro
-    $lastRecordYear = $lastRecord ? date('Y', strtotime($lastRecord->created_at)) : null;
+        // Obtener el año del último registro
+        $lastRecordYear = $lastRecord ? date('Y', strtotime($lastRecord->created_at)) : null;
 
-    // Verificar si el año del último registro es diferente al año actual
-    if ($lastRecordYear != $currentYear) {
-        // Si es diferente, reiniciar el contador
-        $newId = 1;
-    } else {
-        // Obtener el último número correlativo para el año actual
-        $lastId = OfficeProceeding::whereYear('created_at', $currentYear)->max('id');
+        // Verificar si el año del último registro es diferente al año actual
+        if ($lastRecordYear != $currentYear) {
+            // Si es diferente, reiniciar el contador
+            $newId = 1;
+        } else {
+            // Obtener el último número correlativo para el año actual
+            $lastId = OfficeProceeding::whereYear('created_at', $currentYear)->max('id');
 
-        // Incrementar el último número correlativo
-        $newId = $lastId ? $lastId + 1 : 1;
+            // Incrementar el último número correlativo
+            $newId = $lastId ? $lastId + 1 : 1;
+        }
+
+        // Formatear el nuevo número correlativo
+        $formattedId = sprintf('%04d', $newId);
+
+        // Construir el número de correlativo
+        $nCorrelativo = "OAJ-$currentYear-$formattedId";
+
+        // Agregar el número correlativo al request
+        $request->merge(['n_correlativo' => $nCorrelativo]);
+
+        // Crear el oficio
+        $oproceeding = OfficeProceeding::create($request->all());
+
+        return response()->json($oproceeding, 201);
     }
-
-    // Formatear el nuevo número correlativo
-    $formattedId = sprintf('%04d', $newId);
-
-    // Construir el número de correlativo
-    $nCorrelativo = "OAJ-$currentYear-$formattedId";
-
-    // Agregar el número correlativo al request
-    $request->merge(['n_correlativo' => $nCorrelativo]);
-
-    // Crear el oficio
-    $oproceeding = OfficeProceeding::create($request->all());
-
-    return response()->json($oproceeding, 201);
-}
 
     public function updateOfficeProceeding(Request $request, $id)
     {
