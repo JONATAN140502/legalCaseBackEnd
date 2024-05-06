@@ -278,4 +278,18 @@ Route::middleware(['auth:api'])->group(function () {
     Route::prefix('report')->group(function () {
         Route::post('/create', [TradeReportController::class, 'create'])->name('report.index');
     });
+
+    //Oficios de expediente
+       Route::prefix('proceeding-oficios')->group(function () {
+
+        Route::get('/', 'App\Http\Controllers\OfficeProceedingController@getOfficeProceeding');
+
+        Route::get('/{id}', 'App\Http\Controllers\OfficeProceedingController@getOfficeProceedingxid');
+
+        Route::post('/', 'App\Http\Controllers\OfficeProceedingController@insertOfficeProceeding');
+
+        Route::put('/{id}', 'App\Http\Controllers\OfficeProceedingController@updateOfficeProceeding');
+
+        Route::delete('/{id}', 'App\Http\Controllers\OfficeProceedingController@deleteOfficeProceeding');
+    });
 });
