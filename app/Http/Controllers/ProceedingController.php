@@ -50,7 +50,7 @@ class ProceedingController extends Controller
             $formattedData[] = $commonData;
         }
 
-        return response()->json(['data' => $formattedData], 200);
+        return response()->json($formattedData, 200);
     }
 
     protected function archivados()
