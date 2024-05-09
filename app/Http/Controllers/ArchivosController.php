@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\TradeReport;
 use App\Models\LegalDocument;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
@@ -39,22 +39,38 @@ class ArchivosController extends Controller
 
     public function guardarArchivoAdm(Request $request){
         try{
+
+            // Verificación de la existencia del archivo
+            
+            $directorio = $request->doc_tipo;
             $file = $request->file('file');
-            $number = $request->input('number');
-            $doc_tipo = $request->input('doc_tipo');
-
-            // Obtén la extensión del archivo
+            $number = $request->number;
+            
             $extension = $file->getClientOriginalExtension();
-
-            // Construye la ruta del archivo
-            $doc_file = "{$doc_tipo}/{$number}.{$extension}";
+            
+            // Ruta del archivo
+            $doc_file = "{$directorio}/{$number}.{$extension}";
 
             // Almacena el archivo en el disco 'public'
-            Storage::disk('public')->put($doc_file, file_get_contents($file));
+            Storage::disk('public_server')->put($doc_file, file_get_contents($file));
+
+            $trade_report = TradeReport::findOrFail($request->id);
+            if($directorio === 'INFORMES'){
+                $trade_report->update([
+                    'rep_pdf_informe' => $doc_file
+                ]);
+            }else if($directorio === 'OFICIOS'){
+                $trade_report->update([
+                    'rep_pdf_oficio' => $doc_file
+                ]);
+            }
+            $updatedData = TradeReport::find($trade_report->rep_id);
 
             return response()->json([
-                'mensaje' => 'Archivo cargado exitosamente',
+                'mensaje' => "Archivo subido correctamente",
+                'data' => $updatedData
             ]);
+
         }catch (\Exception $e) {
             return response()->json(['error' => 'Error al cargar el archivo: ' . $e->getMessage()], 500);
         }

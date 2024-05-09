@@ -60,7 +60,7 @@ class LawyerController extends Controller
     {
         try {
             $lawyer = Lawyer::findOrFail($request->abo_id);
-            $trades = $lawyer->trades()->with('area')->get();
+            $trades = $lawyer->trades()->with('area', 'report')->get();
             return response()->json(['state' => 'success', 'data' => $trades, 'lawyer' => $lawyer->persona], 200);
         } catch (QueryException $e) {
             $errorMessage = $e->getMessage();
