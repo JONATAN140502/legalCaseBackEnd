@@ -27,6 +27,7 @@ class Trade extends Model
         'tra_are_id',
         'tra_abo_id',
         'tra_type_id',
+        'tra_der_date',
         'anio'
     ];
 
@@ -38,11 +39,6 @@ class Trade extends Model
     public function lawyer()
     {
         return $this->belongsTo(Lawyer::class, 'tra_abo_id', 'abo_id');
-    }
-
-    public function type_reference()
-    {
-        return $this->belongsTo(TypeReference::class, 'tra_type_id', 'type_id');
     }
 
     public function report()

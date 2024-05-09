@@ -262,6 +262,8 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('/nextTraNumber', 'App\Http\Controllers\TradeController@getNextTraNumber')->name('trade.nextTraNumber');
         Route::get('/{id}', 'App\Http\Controllers\TradeController@show')->name('trade.show');
         Route::post('/create', 'App\Http\Controllers\TradeController@create')->name('trade.create');
+        Route::post('/derivar', 'App\Http\Controllers\TradeController@derivar')->name('trade.derivar');
+        Route::put('/update', 'App\Http\Controllers\TradeController@update')->name('trade.update');
     });
 
     //GESTION ADMINISTRATIVA
@@ -284,6 +286,8 @@ Route::middleware(['auth:api'])->group(function () {
     //Report
     Route::prefix('report')->group(function () {
         Route::post('/create', [TradeReportController::class, 'create'])->name('report.index');
+        Route::get('/getNextRepNumber', [TradeReportController::class, 'getNextRepNumber'])->name('report.getNextRepNumber');
+        Route::post('/numInfoNumber', [TradeReportController::class, 'getNumInfoNumber'])->name('report.getNumInfoNumber');
     });
 
     //Oficios de expediente
