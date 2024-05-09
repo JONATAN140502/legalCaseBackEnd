@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AlertController;
 use App\Http\Controllers\ArchivosController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -11,10 +12,19 @@ use App\Http\Controllers\ProceedingController;
 use App\Http\Controllers\LawyerController;
 use App\Http\Controllers\AssistantController;
 use App\Http\Controllers\AudienceController;
+use App\Http\Controllers\CalendarioController;
+use App\Http\Controllers\ClaimController;
+use App\Http\Controllers\CourtController;
+use App\Http\Controllers\ExcelController;
 use App\Http\Controllers\PersonController;
 use App\Http\Controllers\ProceedingTypeController;
 use App\Http\Controllers\FiscaliaController;
+use App\Http\Controllers\MailController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SpecialtyController;
+use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TradeReportController;
+use App\Http\Controllers\WhatsappController;
 
 Route::prefix('/user')->group(function () {
     Route::post('/login', 'App\Http\Controllers\LoginController@login');
@@ -39,11 +49,8 @@ Route::middleware(['auth:api'])->group(function () {
         Route::post('/store', [LawyerController::class, 'store'])->name('lawyer.store');
         Route::post('/update', [LawyerController::class, 'update'])->name('lawyer.update');
         Route::post('/delete/{id}', [LawyerController::class, 'destroy'])->name('lawyer.destroy');
-        // Audiencias por abogado
         Route::post('/audiencias', [LawyerController::class, 'audiencias'])->name('lawyer.audiencias');
-        // Alertas por abogado
         Route::post('/alertas', [LawyerController::class, 'alertas'])->name('lawyer.alertas');
-        // Expedientes por abogado
         Route::post('/calendario', [LawyerController::class, 'calendario'])->name('lawyer.calendario');
         Route::post('/expedientes', [LawyerController::class, 'expedientes'])->name('lawyer.expedientes');
         Route::post('/changeOfLawyer', [LawyerController::class, 'changeOfLawyer'])->name('lawyer.changeOfLawyer');
@@ -51,19 +58,18 @@ Route::middleware(['auth:api'])->group(function () {
 
     // Expedientes
     Route::prefix('proceeding')->group(function () {
-        Route::get('/', 'App\Http\Controllers\ProceedingController@index')->name('proceeding.index');
-        Route::get('/{id}', 'App\Http\Controllers\ProceedingController@show')->name('proceeding.show');
-        Route::get('/{id}/show', 'App\Http\Controllers\ProceedingController@showupdate')->name('proceeding.showupdate');
-        Route::post('/take', 'App\Http\Controllers\ProceedingController@take')->name('proceeding.take');
-        Route::post('/update', 'App\Http\Controllers\ProceedingController@update')->name('proceeding.update');
-        Route::post('/registrarcaso', 'App\Http\Controllers\ProceedingController@registrarcaso')->name('proceeding.registrarcaso');
-        Route::post('/listarestado', 'App\Http\Controllers\ProceedingController@listarestado')->name('proceeding.listarestado');
-        Route::post('/buscarPorId', 'App\Http\Controllers\ProceedingController@buscarPorId')->name('proceeding.buscarPorId');
-        Route::post('/filterprocesal', 'App\Http\Controllers\ProceedingController@filterprocesal')->name('proceeding.filterprocesal');
+        Route::get('/', [ProceedingController::class, 'index'])->name('proceeding.index');
+        Route::get('/{id}', [ProceedingController::class, 'show'])->name('proceeding.show');
+        Route::get('/{id}/show', [ProceedingController::class, 'showupdate'])->name('proceeding.showupdate');
+        Route::post('/take', [ProceedingController::class, 'take'])->name('proceeding.take');
+        Route::post('/update', [ProceedingController::class, 'update'])->name('proceeding.update');
+        Route::post('/registrarcaso', [ProceedingController::class, 'registrarcaso'])->name('proceeding.registrarcaso');
+        Route::post('/listarestado', [ProceedingController::class, 'listarestado'])->name('proceeding.listarestado');
+        Route::post('/buscarPorId', [ProceedingController::class, 'buscarPorId'])->name('proceeding.buscarPorId');
+        Route::post('/filterprocesal', [ProceedingController::class, 'filterprocesal'])->name('proceeding.filterprocesal');
         Route::post('/archivados', [ProceedingController::class, 'archivados'])->name('proceeding.archivados');
         Route::post('/destroy', [ProceedingController::class, 'destroy'])->name('proceeding.destroy');
-        Route::get('/delete/list', 'App\Http\Controllers\ProceedingController@deletelist')->name('proceeding.deletelist');
-
+        Route::get('/delete/list', [ProceedingController::class, 'deletelist'])->name('proceeding.deletelist');
         Route::post('/audiencias', [ProceedingController::class, 'audiencias'])->name('proceeding.audiencias');
         Route::post('/alertas', [ProceedingController::class, 'alertas'])->name('proceeding.alertas');
     });
@@ -84,8 +90,8 @@ Route::middleware(['auth:api'])->group(function () {
         Route::put('/update', [InstanceController::class, 'update'])->name('Instance.update');
         Route::delete('/destroy/{id}', [InstanceController::class, 'destroy'])->name('Instance.destroy');
     });
-     //fiscalias
-     Route::prefix('fiscalia')->group(function () {
+    //fiscalias
+    Route::prefix('fiscalia')->group(function () {
         Route::post('/', [FiscaliaController::class, 'index'])->name('Fiscalia.index');
         Route::post('/show', [FiscaliaController::class, 'show'])->name('Fiscalia.show');
         Route::post('/store', [FiscaliaController::class, 'store'])->name('Fiscalia.store');
@@ -94,15 +100,15 @@ Route::middleware(['auth:api'])->group(function () {
     });
     //especialidades
     Route::prefix('specialty')->group(function () {
-        Route::get('/', 'App\Http\Controllers\SpecialtyController@index')->name('specialty.index');
-        Route::post('/show', 'App\Http\Controllers\SpecialtyController@show')->name('specialty.show');
-        Route::post('/store', 'App\Http\Controllers\SpecialtyController@store')->name('specialty.registrar');
-        Route::post('/update', 'App\Http\Controllers\SpecialtyController@update')->name('specialty.update');
-        Route::post('/destroy', 'App\Http\Controllers\SpecialtyController@destroy')->name('specialty.eliminar');
+        Route::get('/', [SpecialtyController::class, 'index'])->name('specialty.index');
+        Route::post('/show', [SpecialtyController::class, 'show'])->name('specialty.show');
+        Route::post('/store', [SpecialtyController::class, 'store'])->name('specialty.registrar');
+        Route::post('/update', [SpecialtyController::class, 'update'])->name('specialty.update');
+        Route::post('/destroy', [SpecialtyController::class, 'destroy'])->name('specialty.eliminar');
     });
 
     Route::prefix('personas')->group(function () {
-        Route::get('/', [PersonController::class , 'index'])->name('person.index');
+        Route::get('/', [PersonController::class, 'index'])->name('person.index');
         Route::post('/equipo', [PersonController::class, 'equipo'])->name('person.equipo');
         Route::post('/crearIntegrante', [LawyerController::class, 'crearIntegrante'])->name('lawyer.crearIntegrante');
         Route::post('/detallePersona', [PersonController::class, 'detallePersona'])->name('person.detallePersona');
@@ -113,64 +119,64 @@ Route::middleware(['auth:api'])->group(function () {
 
     // Demandantes
     Route::prefix('demandante')->group(function () {
-        Route::get('/', [PersonController::class , 'index'])->name('demandante.index');
-        Route::get('/detalledemandante/{doc}', 'App\Http\Controllers\PersonController@detalledemandante')->name('demandante.detalledemandante');
-        Route::post('/expedientes', 'App\Http\Controllers\PersonController@traerexpedientes')->name('demandante.traerexpedientes');
-        // Nuevas rutas para obtener información por documento
-        Route::get('/direccion/{doc}', 'App\Http\Controllers\PersonController@getAddressByDocument')->name('demandante.getaddressbydocument');
-        Route::get('/historial/{doc}', 'App\Http\Controllers\PersonController@getHistoryByDocument')->name('demandante.gethistorybydocument');
-        Route::get('/pagos/{doc}', 'App\Http\Controllers\PersonController@getPaymentsByDocument')->name('demandante.getpaymentsbydocument');
-
-        Route::post('/updateDni', 'App\Http\Controllers\PersonController@updateDni')->name('demandante.updateDni');
-        Route::post('/logout', 'App\Http\Controllers\PersonController@salir')->name('demandante.salir');
+        Route::get('/', [PersonController::class, 'index'])->name('demandante.index');
+        Route::get('/detalledemandante/{doc}', [PersonController::class, 'detalledemandante'])->name('demandante.detalledemandante');
+        Route::post('/expedientes', [PersonController::class, 'traerexpedientes'])->name('demandante.traerexpedientes');
+        Route::get('/direccion/{doc}', [PersonController::class, 'getAddressByDocument'])->name('demandante.getaddressbydocument');
+        Route::get('/historial/{doc}', [PersonController::class, 'getHistoryByDocument'])->name('demandante.gethistorybydocument');
+        Route::get('/pagos/{doc}', [PersonController::class, 'getPaymentsByDocument'])->name('demandante.getpaymentsbydocument');
+        Route::post('/updateDni', [PersonController::class, 'updateDni'])->name('demandante.updateDni');
+        Route::post('/logout', [PersonController::class, 'salir'])->name('demandante.salir');
     });
+
     Route::prefix('demandado')->group(function () {
-        Route::get('/', 'App\Http\Controllers\PersonController@indexdemandados')->name('demandado.indexdemandados');
-        Route::get('/detalledemandado/{doc}', 'App\Http\Controllers\PersonController@detalledemandado')->name('demandado.detalledemandado');
-        Route::get('/historial/{doc}', 'App\Http\Controllers\PersonController@getHistoryByDocument')->name('demandado.gethistorybydocument');
-        Route::post('/expedientes', 'App\Http\Controllers\PersonController@traerexpedientesDemandado')->name('demandado.traerexpedientesDemandado');
+        Route::get('/', [PersonController::class, 'indexdemandados'])->name('demandado.indexdemandados');
+        Route::get('/detalledemandado/{doc}', [PersonController::class, 'detalledemandado'])->name('demandado.detalledemandado');
+        Route::get('/historial/{doc}', [PersonController::class, 'getHistoryByDocument'])->name('demandado.gethistorybydocument');
+        Route::post('/expedientes', [PersonController::class, 'traerexpedientesDemandado'])->name('demandado.traerexpedientesDemandado');
     });
 
     // Historial de Comunicaciones
     Route::prefix('history')->group(function () {
-        Route::get('/', 'App\Http\Controllers\HistoryController@index')->name('history.index');
-        Route::post('/store', 'App\Http\Controllers\HistoryController@store')->name('history.store');
-        Route::get('data/{doc}', 'App\Http\Controllers\HistoryController@data')->name('history.data');
-        Route::post('/showPerson', 'App\Http\Controllers\HistoryController@showPerson')->name('history.showPerson');
+        Route::get('/', [HistoryController::class, 'index'])->name('history.index');
+        Route::post('/store', [HistoryController::class, 'store'])->name('history.store');
+        Route::get('data/{doc}', [HistoryController::class, 'data'])->name('history.data');
+        Route::post('/showPerson', [HistoryController::class, 'showPerson'])->name('history.showPerson');
     });
 
     // Historial de Pagos
-    Route::prefix('payment')->group(function () {
-        Route::get('/', 'App\Http\Controllers\PaymentController@index')->name('payment.index');
-        Route::post('/store', 'App\Http\Controllers\PaymentController@store')->name('payment.store');
-    });
+    // Route::prefix('payment')->group(function () {
+    //     Route::get('/', [PaymentC::class, 'index'])->name('payment.index');
+    //     Route::post('/store', [PaymentController::class, 'store'])->name('payment.store');
+    // });
 
     // Generacion de Reportes
     Route::prefix('reportes')->group(function () {
-        Route::post('/inicio', 'App\Http\Controllers\ReportController@inicio')->name('reportes.inicio');
-        Route::post('/inicioadmin', 'App\Http\Controllers\ReportController@inicioAdmin')->name('reportes.inicioAdmin');
-        Route::post('/exprecientes', 'App\Http\Controllers\ReportController@exprecientes')->name('reportes.exprecientes');
-        Route::post('/distritos', 'App\Http\Controllers\ReportController@distritos')->name('reportes.distritos');
+        Route::post('/inicio', [ReportController::class, 'inicio'])->name('reportes.inicio');
+        Route::post('/inicioadmin', [ReportController::class, 'inicioAdmin'])->name('reportes.inicioAdmin');
+        Route::post('/exprecientes', [ReportController::class, 'exprecientes'])->name('reportes.exprecientes');
+        Route::post('/distritos', [ReportController::class, 'distritos'])->name('reportes.distritos');
     });
+
     // Generacion de Reportes  pdf
-        Route::prefix('reportespfd')->group(function () {
-        Route::get('/pdfexparchivados', 'App\Http\Controllers\ReportController@pdfexparchivados')->name('reportes.pdfexptramite');
-        Route::get('/pdfabogados', 'App\Http\Controllers\ReportController@pdfabogados')->name('reportes.pdfabogados');
-        Route::get('/pdfexptramite', 'App\Http\Controllers\ReportController@pdfexptramite')->name('reportes.pdfexptramite');
-        Route::get('/pdfexpejecucion', 'App\Http\Controllers\ReportController@pdfexpejecucion')->name('reportes.pdfexpejecucion');
-        Route::get('/pdfexps', 'App\Http\Controllers\ReportController@pdfexps')->name('reportes.pdfexps');
-        Route::get('/pdfdemandantes', 'App\Http\Controllers\ReportController@pdfdemandantes')->name('reportes.pdfdemandantes');
-        Route::get('/pdffechaaño', 'App\Http\Controllers\ReportController@pdffechaaño')->name('reportes.pdffechaaño');
-        Route::get('/pdfmateria', 'App\Http\Controllers\ReportController@pdfmateria')->name('reportes.pdfmateria');
-        Route::get('/pdfexpsabogado', 'App\Http\Controllers\ReportController@pdfexpsabogado')->name('reportes.pdfexpsabogado');
-        Route::get('/pdfpretensiones', 'App\Http\Controllers\ReportController@pdfpretenciones')->name('reportes.pdfpretenciones');
-        Route::get('/pdfejecuciones', 'App\Http\Controllers\ReportController@pdfejecuciones')->name('reportes.pdfejecuciones');
-        Route::get('/pdfpretension', 'App\Http\Controllers\ReportController@pdfpretension')->name('reportes.pdfpretension');
-        Route::get('/pdffechas', 'App\Http\Controllers\ReportController@pdffechas')->name('reportes.pdffechas');
-        Route::get('/pdfdistrito', 'App\Http\Controllers\ReportController@pdfdistrito')->name('reportes.pdfdistrito');
-        Route::get('/pdfbarras', 'App\Http\Controllers\ReportController@contarExpedientesPorAnio')->name('reportes.contarExpedientesPorAnio');
-        Route::get('/abocantidad', 'App\Http\Controllers\ReportController@contarExpedientesPorAboTipo')->name('reportes.contarExpedientesPorAboTipo');
-    
+    Route::prefix('reportespfd')->group(function () {
+        Route::get('/pdfexparchivados', [ReportController::class, 'pdfexparchivados'])->name('reportes.pdfexptramite');
+        Route::get('/pdfabogados', [ReportController::class, 'pdfabogados'])->name('reportes.pdfabogados');
+        Route::get('/pdfexptramite', [ReportController::class, 'pdfexptramite'])->name('reportes.pdfexptramite');
+        Route::get('/pdfexpejecucion', [ReportController::class, 'pdfexpejecucion'])->name('reportes.pdfexpejecucion');
+        Route::get('/pdfexps', [ReportController::class, 'pdfexps'])->name('reportes.pdfexps');
+        Route::get('/pdfdemandantes', [ReportController::class, 'pdfdemandantes'])->name('reportes.pdfdemandantes');
+        Route::get('/pdffechaaño', [ReportController::class, 'pdffechaaño'])->name('reportes.pdffechaaño');
+        Route::get('/pdfmateria', [ReportController::class, 'pdfmateria'])->name('reportes.pdfmateria');
+        Route::get('/pdfexpsabogado', [ReportController::class, 'pdfexpsabogado'])->name('reportes.pdfexpsabogado');
+        Route::get('/pdfpretensiones', [ReportController::class, 'pdfpretenciones'])->name('reportes.pdfpretenciones');
+        Route::get('/pdfejecuciones', [ReportController::class, 'pdfejecuciones'])->name('reportes.pdfejecuciones');
+        Route::get('/pdfpretension', [ReportController::class, 'pdfpretension'])->name('reportes.pdfpretension');
+        Route::get('/pdffechas', [ReportController::class, 'pdffechas'])->name('reportes.pdffechas');
+        Route::get('/pdfdistrito', [ReportController::class, 'pdfdistrito'])->name('reportes.pdfdistrito');
+        Route::get('/pdfbarras', [ReportController::class, 'contarExpedientesPorAnio'])->name('reportes.contarExpedientesPorAnio');
+        Route::get('/abocantidad', [ReportController::class, 'contarExpedientesPorAboTipo'])->name('reportes.contarExpedientesPorAboTipo');
+        Route::get('/proceedingType', [ReportController::class, 'proceedingType'])->name('reportes.proceedingType');
     });
 
     // Audiencias
@@ -183,58 +189,60 @@ Route::middleware(['auth:api'])->group(function () {
     Route::prefix('archivos')->group(function () {
         Route::get('/descargar', [ArchivosController::class, 'descargar'])->name('archivos.descargar');
         Route::post('/guardar', [ArchivosController::class, 'guardar'])->name('archivos.guardar');
-        Route::post('/actualizar/eje', [ArchivosController::class, 'actualizarEje'])->name('archivos.actualizarEje)');
-        Route::post('/guardarArchivoAdm', 'App\Http\Controllers\ArchivosController@guardarArchivoAdm')->name('archivos.guardarArchivoAdm');
+        Route::post('/actualizar/eje', [ArchivosController::class, 'actualizarEje'])->name('archivos.actualizarEje');
+        Route::post('/guardarArchivoAdm', [ArchivosController::class, 'guardarArchivoAdm'])->name('archivos.guardarArchivoAdm');
     });
-    //llevar excel a la Bd
+
     Route::prefix('excel')->group(function () {
-        Route::post('/cargar', 'App\Http\Controllers\ExcelController@index')->name('excel.index');
+        Route::post('/cargar', [ExcelController::class, 'index'])->name('excel.index');
     });
+
     Route::prefix('traer')->group(function () {
-        Route::get('/archivo', 'App\Http\Controllers\ArchivosController@traerpdfprincipal')->name('traer.traerpdfprincipal');
+        Route::get('/archivo', [ArchivosController::class, 'traerpdfprincipal'])->name('traer.traerpdfprincipal');
     });
 
-    //mandar mensajes  a celular
     Route::prefix('mensajes')->group(function () {
-        Route::get('/', 'App\Http\Controllers\WhatsappController@index')->name('mensajes.index');
+        Route::get('/', [WhatsappController::class, 'index'])->name('mensajes.index');
     });
 
-    //Alertas
     Route::prefix('alerta')->group(function () {
-        Route::get('/', 'App\Http\Controllers\AlertController@index')->name('alerta.index');
-        Route::post('/store', 'App\Http\Controllers\AlertController@store')->name('mensajes.store');
+        Route::get('/', [AlertController::class, 'index'])->name('alerta.index');
+        Route::post('/store', [AlertController::class, 'store'])->name('mensajes.store');
     });
-    //calendario
+
     Route::prefix('calendario')->group(function () {
-        Route::get('/', 'App\Http\Controllers\CalendarioController@index')->name('calendario.index');
+        Route::get('/', [CalendarioController::class, 'index'])->name('calendario.index');
     });
+
     //Juzgados
     Route::prefix('juzgado')->group(function () {
-        Route::post('/', 'App\Http\Controllers\CourtController@index')->name('juzgado.index');
-        Route::post('/store', 'App\Http\Controllers\CourtController@store')->name('juzgado.store');
-        Route::post('/destroy', 'App\Http\Controllers\CourtController@destroy')->name('juzgado.destroy');
-        Route::post('/update', 'App\Http\Controllers\CourtController@update')->name('juzgado.update');
-        Route::post('/favorite', 'App\Http\Controllers\CourtController@favorite')->name('juzgado.favorite');
+        Route::post('/', [CourtController::class, 'index'])->name('juzgado.index');
+        Route::post('/store', [CourtController::class, 'store'])->name('juzgado.store');
+        Route::post('/destroy', [CourtController::class, 'destroy'])->name('juzgado.destroy');
+        Route::post('/update', [CourtController::class, 'update'])->name('juzgado.update');
+        Route::post('/favorite', [CourtController::class, 'favorite'])->name('juzgado.favorite');
     });
+
     //materias
     Route::prefix('subject')->group(function () {
-        Route::get('/', 'App\Http\Controllers\SubjectController@index')->name('subject.index');
-        Route::post('/show', 'App\Http\Controllers\SubjectController@show')->name('subject.show');
-        Route::post('/store', 'App\Http\Controllers\SubjectController@registrar')->name('subject.registrar');
-        Route::post('/update', 'App\Http\Controllers\SubjectController@update')->name('subject.update');
-        Route::post('/destroy', 'App\Http\Controllers\SubjectController@eliminar')->name('subject.eliminar');
+        Route::get('/', [SubjectController::class, 'index'])->name('subject.index');
+        Route::post('/show', [SubjectController::class, 'show'])->name('subject.show');
+        Route::post('/store', [SubjectController::class, 'registrar'])->name('subject.registrar');
+        Route::post('/update', [SubjectController::class, 'update'])->name('subject.update');
+        Route::post('/destroy', [SubjectController::class, 'eliminar'])->name('subject.eliminar');
     });
 
     //pretensiones
     Route::prefix('claim')->group(function () {
-        Route::get('/', 'App\Http\Controllers\ClaimController@index')->name('claim.index');
-        Route::post('/show', 'App\Http\Controllers\ClaimController@show')->name('claim.show');
-        Route::post('/store', 'App\Http\Controllers\ClaimController@registrar')->name('claim.registrar');
-        Route::post('/update', 'App\Http\Controllers\ClaimController@update')->name('claim.update');
-        Route::post('/destroy', 'App\Http\Controllers\ClaimController@eliminar')->name('claim.eliminar');
+        Route::get('/', [ClaimController::class, 'index'])->name('claim.index');
+        Route::post('/show', [ClaimController::class, 'show'])->name('claim.show');
+        Route::post('/store', [ClaimController::class, 'registrar'])->name('claim.registrar');
+        Route::post('/update', [ClaimController::class, 'update'])->name('claim.update');
+        Route::post('/destroy', [ClaimController::class, 'eliminar'])->name('claim.eliminar');
     });
+
     Route::prefix('mail')->group(function () {
-        Route::post('/', 'App\Http\Controllers\MailController@mail')->name('mail.mail');
+        Route::post('/', [MailController::class, 'mail'])->name('mail.mail');
     });
 
     //GESTION ADMINISTRATIVA
@@ -282,4 +290,17 @@ Route::middleware(['auth:api'])->group(function () {
         Route::post('/numInfoNumber', [TradeReportController::class, 'getNumInfoNumber'])->name('report.getNumInfoNumber');
     });
 
+    //Oficios de expediente
+    Route::prefix('proceeding-oficios')->group(function () {
+
+        Route::get('/', 'App\Http\Controllers\OfficeProceedingController@getOfficeProceeding');
+
+        Route::get('/{id}', 'App\Http\Controllers\OfficeProceedingController@getOfficeProceedingxid');
+
+        Route::post('/', 'App\Http\Controllers\OfficeProceedingController@insertOfficeProceeding');
+
+        Route::put('/{id}', 'App\Http\Controllers\OfficeProceedingController@updateOfficeProceeding');
+
+        Route::delete('/{id}', 'App\Http\Controllers\OfficeProceedingController@deleteOfficeProceeding');
+    });
 });
