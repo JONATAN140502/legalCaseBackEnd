@@ -10,7 +10,10 @@ use Illuminate\Support\Collection;
 use App\Http\Resources\{
     LawyerResource
 };
+use App\Models\Alert;
+use App\Models\Audience;
 use App\Models\Audit;
+use App\Models\Proceeding;
 
 class ReportController extends Controller
 {
@@ -23,31 +26,35 @@ class ReportController extends Controller
     }
     protected function inicioAdmin(Request $request)
     {
-        $exp = Audit::orderBy('created_at', 'DESC')
-            ->with(['user' => function ($query) {
-                $query->withTrashed();
-            }, 'exp'])
+        $audit = Audit::with(['user' => function ($query) {
+            $query->withTrashed();
+        }, 'exp'])
+            ->latest()
+            ->take(6)
             ->get();
-        $today = date("Y-m-d");  //hoy
-        $expTotal = \App\Models\Proceeding::whereIn(
-            'exp_estado_proceso',
-            [
-                'EN TRAMITE',
-                'EN EJECUCION'
-            ]
-        )->count();
+        $proceeding = Proceeding::latest()->take(6)->get();
 
-        $alerts = \App\Models\Alert::where('ale_fecha_vencimiento', '>=', $today)
-            ->count();
-        $audiences = \App\Models\Audience::where('au_fecha', '>=', $today)
-            ->count();
-        $combinedData = [
-            'expTotal' => $expTotal,
-            'alerts' => $alerts,
-            'audiences' => $audiences
-        ];
+        // Obtener la fecha de hoy
+        $today = now()->format('Y-m-d');
+
+        // Contar el total de expedientes en trámite o en ejecución
+        $expTotal = Proceeding::whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])->count();
+
+        // Contar las alertas con fecha de vencimiento mayor o igual a la fecha de hoy
+        $alerts = Alert::where('ale_fecha_vencimiento', '>=', $today)->count();
+
+        // Contar las audiencias con fecha mayor o igual a la fecha de hoy
+        $audiences = Audience::where('au_fecha', '>=', $today)->count();
+
+        // Crear el arreglo combinado de datos
+        $combinedData = compact('expTotal', 'alerts', 'audiences');
+
+        // Devolver una respuesta JSON con el estado, los datos de auditoría, y los datos combinados
         return response()->json([
-            'state' => 0, 'data' => $exp, 'count' => $combinedData
+            'state' => 0, // Supongo que 0 indica un estado correcto, ajusta según necesites
+            'audit' => $audit,
+            'count' => $combinedData,
+            'proceeding' => $proceeding
         ], 200);
     }
 

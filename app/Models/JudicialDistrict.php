@@ -32,8 +32,18 @@ class JudicialDistrict extends Model
     /**
      * Define la relación con el modelo Expediente.
      */
-    public function expedientes()
+    public function proceeding()
     {
-        return $this->hasMany(Expediente::class,  'judis_id', 'exp_dis_judicial');
+        return $this->hasMany(Proceeding::class,  'judis_id', 'exp_dis_judicial');
+    }
+
+    public function instance()
+    {
+        return $this->hasMany(Instance::class, 'ins_id');
+    }
+
+    public function court()
+    {
+        return $this->hasMany(Court::class, 'co_id');
     }
 }

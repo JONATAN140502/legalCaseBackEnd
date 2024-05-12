@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+
 class Instance extends Model
 {
     use HasFactory, SoftDeletes;
@@ -19,7 +20,11 @@ class Instance extends Model
 
     public function judicialdistrict()
     {
-        return $this->belongsTo(JudicialDistrict::class, 'ins_id', 'exp_instancia');
+        return $this->belongsTo(JudicialDistrict::class, 'judis_id');
+    }
+
+    public function proceeding()
+    {
+        return $this->hasMany(Proceeding::class, 'judis_id', 'exp_dis_judicial');
     }
 }
-

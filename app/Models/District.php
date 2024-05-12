@@ -16,12 +16,14 @@ class District extends Model
         'pro_id'
     ];
     protected $dates = ['created_at', 'updated_at', 'deleted_at'];
-    public function province()
+
+    public function direccion()
     {
-        return $this->belongsTo(Province::class, 'pro_id', 'pro_id');
+        return $this->hasMany(Address::class, 'dis_id');
     }
 
-    public function direccion(){
-        return $this->hasMany(Address::class, 'dis_id');
+    public function province()
+    {
+        return $this->belongsTo(Province::class, 'pro_id');
     }
 }

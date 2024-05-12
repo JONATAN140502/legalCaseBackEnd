@@ -5,9 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+
 class Person extends Model
 {
-    use HasFactory,SoftDeletes;
+    use HasFactory, SoftDeletes;
     protected $table = 'persons';
     protected $primaryKey = 'per_id';
     protected $fillable = [
@@ -23,33 +24,43 @@ class Person extends Model
         'nat_telefono',
         'nat_correo',
         'per_condicion',
-        'tipo_procesal'
-        , 'fallecido'
+        'tipo_procesal', 'fallecido'
     ];
     protected $dates = ['deleted_at'];
+
     public function procesal()
     {
-        return $this->hasMany(Procesal::class, 'per_id','per_id');
+        return $this->hasMany(Procesal::class, 'per_id', 'per_id');
     }
 
-    public function audiencia(){
+    public function audiencia()
+    {
         return $this->hasMany(Audience::class, 'per_id');
     }
 
-    public function abogado(){
+    public function abogado()
+    {
         return $this->hasMany(Lawyer::class, 'per_id');
     }
 
-    public function assistant(){
-        return $this->hasMany(Assistant::class, 'per_id');
-    }
+    // public function assistant()
+    // {
+    //     return $this->hasMany(Assistant::class, 'per_id');
+    // }
 
     public function address()
     {
-        return $this->hasMany(Address::class, 'per_id','per_id');
+        return $this->hasMany(Address::class, 'per_id', 'per_id');
     }
 
-    public function trades(){
+    public function trades()
+    {
         return $this->belongsToMany(Trade::class, 'person_trades', 'pt_per_id', 'pt_tra_id');
+    }
+
+    //v1
+    public function user()
+    {
+        return $this->hasOne(User::class, 'id');
     }
 }

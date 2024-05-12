@@ -19,15 +19,21 @@ use App\Http\Controllers\ExcelController;
 use App\Http\Controllers\PersonController;
 use App\Http\Controllers\ProceedingTypeController;
 use App\Http\Controllers\FiscaliaController;
+use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MailController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SpecialtyController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TradeReportController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\WhatsappController;
 
+Route::group(['prefix' => 'v1'], function () {
+    require __DIR__ . '/v1.php';
+});
+
 Route::prefix('/user')->group(function () {
-    Route::post('/login', 'App\Http\Controllers\LoginController@login');
+    Route::post('/login', [LoginController::class, 'login']);
 });
 
 Route::get('/pdf', 'App\Http\Controllers\ReportController@contarExpedientesPorAboTipo');
