@@ -73,7 +73,7 @@
 
 <div class="header">
     <img src="{{ asset('images/log.jpg') }}" style="position: absolute; top: 10px; right: 10px; width: 180px; height: auto; z-index: 9999;" />
-    <p class="header-title" style="margin-right: 200px;">Demandas Realizadas Por Año</p>
+    <p class="header-title" style="margin-right: 200px;">Demandas Realizadas Por Año Civil/Laboral</p>
 </div>
 <div>
 <!-- <img src="https://quickchart.io/chart?v=2.9.4&c={type:'bar',data:{labels:[{!! $data->pluck('year')->implode(',')!!}],datasets:[{label:'Demandas',backgroundColor:'rgba(54, 162, 235, 0.5)',borderColor:'rgb(54, 162, 235)',borderWidth:1,data:[{!! $data->pluck('cantidad')->implode(',') !!}]}]}}" style="width: 90%;"> -->

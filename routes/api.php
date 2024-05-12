@@ -22,6 +22,9 @@ use App\Http\Controllers\FiscaliaController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MailController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ReportControllerpenal;
+use App\Http\Controllers\ReportControllerarbitral;
+use App\Http\Controllers\ReportControllerindecopi;
 use App\Http\Controllers\SpecialtyController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TradeReportController;
@@ -185,6 +188,63 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('/proceedingType', [ReportController::class, 'proceedingType'])->name('reportes.proceedingType');
     });
 
+    Route::prefix('reportespfdpenal')->group(function () {
+        Route::get('/pdfexparchivados', [ReportControllerpenal::class, 'pdfexparchivados'])->name('reportes.pdfexptramite');
+        Route::get('/pdfabogados', [ReportControllerpenal::class, 'pdfabogados'])->name('reportes.pdfabogados');
+        Route::get('/pdfexptramite', [ReportControllerpenal::class, 'pdfexptramite'])->name('reportes.pdfexptramite');
+        Route::get('/pdfexpejecucion', [ReportControllerpenal::class, 'pdfexpejecucion'])->name('reportes.pdfexpejecucion');
+        Route::get('/pdfexps', [ReportControllerpenal::class, 'pdfexps'])->name('reportes.pdfexps');
+        Route::get('/pdfdemandantes', [ReportControllerpenal::class, 'pdfdemandantes'])->name('reportes.pdfdemandantes');
+        Route::get('/pdffechaaño', [ReportControllerpenal::class, 'pdffechaaño'])->name('reportes.pdffechaaño');
+        Route::get('/pdfmateria', [ReportControllerpenal::class, 'pdfmateria'])->name('reportes.pdfmateria');
+        Route::get('/pdfexpsabogado', [ReportControllerpenal::class, 'pdfexpsabogado'])->name('reportes.pdfexpsabogado');
+        Route::get('/pdfpretensiones', [ReportControllerpenal::class, 'pdfpretenciones'])->name('reportes.pdfpretenciones');
+        Route::get('/pdfejecuciones', [ReportControllerpenal::class, 'pdfejecuciones'])->name('reportes.pdfejecuciones');
+        Route::get('/pdfpretension', [ReportControllerpenal::class, 'pdfpretension'])->name('reportes.pdfpretension');
+        Route::get('/pdffechas', [ReportControllerpenal::class, 'pdffechas'])->name('reportes.pdffechas');
+        Route::get('/pdfdistrito', [ReportControllerpenal::class, 'pdfdistrito'])->name('reportes.pdfdistrito');
+        Route::get('/pdfbarras', [ReportControllerpenal::class, 'contarExpedientesPorAnio'])->name('reportes.contarExpedientesPorAnio');
+        Route::get('/abocantidad', [ReportControllerpenal::class, 'contarExpedientesPorAboTipo'])->name('reportes.contarExpedientesPorAboTipo');
+        Route::get('/proceedingType', [ReportControllerpenal::class, 'proceedingType'])->name('reportes.proceedingType');
+    });
+    Route::prefix('reportespfdarbitral')->group(function () {
+        Route::get('/pdfexparchivados', [ReportControllerarbitral::class, 'pdfexparchivados'])->name('reportes.pdfexptramite');
+        Route::get('/pdfabogados', [ReportControllerarbitral::class, 'pdfabogados'])->name('reportes.pdfabogados');
+        Route::get('/pdfexptramite', [ReportControllerarbitral::class, 'pdfexptramite'])->name('reportes.pdfexptramite');
+        Route::get('/pdfexpejecucion', [ReportControllerarbitral::class, 'pdfexpejecucion'])->name('reportes.pdfexpejecucion');
+        Route::get('/pdfexps', [ReportControllerarbitral::class, 'pdfexps'])->name('reportes.pdfexps');
+        Route::get('/pdfdemandantes', [ReportControllerarbitral::class, 'pdfdemandantes'])->name('reportes.pdfdemandantes');
+        Route::get('/pdffechaaño', [ReportControllerarbitral::class, 'pdffechaaño'])->name('reportes.pdffechaaño');
+        Route::get('/pdfmateria', [ReportControllerarbitral::class, 'pdfmateria'])->name('reportes.pdfmateria');
+        Route::get('/pdfexpsabogado', [ReportControllerarbitral::class, 'pdfexpsabogado'])->name('reportes.pdfexpsabogado');
+        Route::get('/pdfpretensiones', [ReportControllerarbitral::class, 'pdfpretenciones'])->name('reportes.pdfpretenciones');
+        Route::get('/pdfejecuciones', [ReportControllerarbitral::class, 'pdfejecuciones'])->name('reportes.pdfejecuciones');
+        Route::get('/pdfpretension', [ReportControllerarbitral::class, 'pdfpretension'])->name('reportes.pdfpretension');
+        Route::get('/pdffechas', [ReportControllerarbitral::class, 'pdffechas'])->name('reportes.pdffechas');
+        Route::get('/pdfdistrito', [ReportControllerarbitral::class, 'pdfdistrito'])->name('reportes.pdfdistrito');
+        Route::get('/pdfbarras', [ReportControllerarbitral::class, 'contarExpedientesPorAnio'])->name('reportes.contarExpedientesPorAnio');
+        Route::get('/abocantidad', [ReportControllerarbitral::class, 'contarExpedientesPorAboTipo'])->name('reportes.contarExpedientesPorAboTipo');
+        Route::get('/proceedingType', [ReportControllerarbitral::class, 'proceedingType'])->name('reportes.proceedingType');
+    });
+    Route::prefix('reportespfdindecopi')->group(function () {
+        Route::get('/pdfexparchivados', [ReportControllerindecopi::class, 'pdfexparchivados'])->name('reportes.pdfexptramite');
+        Route::get('/pdfabogados', [ReportControllerindecopi::class, 'pdfabogados'])->name('reportes.pdfabogados');
+        Route::get('/pdfexptramite', [ReportControllerindecopi::class, 'pdfexptramite'])->name('reportes.pdfexptramite');
+        Route::get('/pdfexpejecucion', [ReportControllerindecopi::class, 'pdfexpejecucion'])->name('reportes.pdfexpejecucion');
+        Route::get('/pdfexps', [ReportControllerindecopi::class, 'pdfexps'])->name('reportes.pdfexps');
+        Route::get('/pdfdemandantes', [ReportControllerindecopi::class, 'pdfdemandantes'])->name('reportes.pdfdemandantes');
+        Route::get('/pdffechaaño', [ReportControllerindecopi::class, 'pdffechaaño'])->name('reportes.pdffechaaño');
+        Route::get('/pdfmateria', [ReportControllerindecopi::class, 'pdfmateria'])->name('reportes.pdfmateria');
+        Route::get('/pdfexpsabogado', [ReportControllerindecopi::class, 'pdfexpsabogado'])->name('reportes.pdfexpsabogado');
+        Route::get('/pdfpretensiones', [ReportControllerindecopi::class, 'pdfpretenciones'])->name('reportes.pdfpretenciones');
+        Route::get('/pdfejecuciones', [ReportControllerindecopi::class, 'pdfejecuciones'])->name('reportes.pdfejecuciones');
+        Route::get('/pdfpretension', [ReportControllerindecopi::class, 'pdfpretension'])->name('reportes.pdfpretension');
+        Route::get('/pdffechas', [ReportControllerindecopi::class, 'pdffechas'])->name('reportes.pdffechas');
+        Route::get('/pdfdistrito', [ReportControllerindecopi::class, 'pdfdistrito'])->name('reportes.pdfdistrito');
+        Route::get('/pdfbarras', [ReportControllerindecopi::class, 'contarExpedientesPorAnio'])->name('reportes.contarExpedientesPorAnio');
+        Route::get('/abocantidad', [ReportControllerindecopi::class, 'contarExpedientesPorAboTipo'])->name('reportes.contarExpedientesPorAboTipo');
+        Route::get('/proceedingType', [ReportControllerindecopi::class, 'proceedingType'])->name('reportes.proceedingType');
+    });
     // Audiencias
     Route::prefix('audiences')->group(function () {
         Route::get('/', [AudienceController::class, 'index'])->name('audiences.index');
@@ -268,8 +328,6 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('/nextTraNumber', 'App\Http\Controllers\TradeController@getNextTraNumber')->name('trade.nextTraNumber');
         Route::get('/{id}', 'App\Http\Controllers\TradeController@show')->name('trade.show');
         Route::post('/create', 'App\Http\Controllers\TradeController@create')->name('trade.create');
-        Route::post('/derivar', 'App\Http\Controllers\TradeController@derivar')->name('trade.derivar');
-        Route::put('/update', 'App\Http\Controllers\TradeController@update')->name('trade.update');
     });
 
     //GESTION ADMINISTRATIVA
@@ -292,8 +350,6 @@ Route::middleware(['auth:api'])->group(function () {
     //Report
     Route::prefix('report')->group(function () {
         Route::post('/create', [TradeReportController::class, 'create'])->name('report.index');
-        Route::get('/getNextRepNumber', [TradeReportController::class, 'getNextRepNumber'])->name('report.getNextRepNumber');
-        Route::post('/numInfoNumber', [TradeReportController::class, 'getNumInfoNumber'])->name('report.getNumInfoNumber');
     });
 
     //Oficios de expediente
