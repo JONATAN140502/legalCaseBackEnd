@@ -31,9 +31,9 @@ use App\Http\Controllers\TradeReportController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WhatsappController;
 
-Route::group(['prefix' => 'v1'], function () {
-    require __DIR__ . '/v1.php';
-});
+// Route::group(['prefix' => 'v1'], function () {
+//     require __DIR__ . '/v1.php';
+// });
 
 Route::prefix('/user')->group(function () {
     Route::post('/login', [LoginController::class, 'login']);
