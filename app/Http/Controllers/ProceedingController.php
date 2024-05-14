@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 use Uuid;
 use  Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class ProceedingController extends Controller
 {
@@ -24,33 +26,49 @@ class ProceedingController extends Controller
     const ARCHIVADO = 'ARCHIVADO';
     const INVESTIGACION = 'EN INVESTIGACION';
 
-    protected function index()
+    public function index()
     {
-        $procedings = Proceeding::latest()
-            ->whereIn('exp_estado_proceso', [self::TRAMITE, self::EJECUCION, self::INVESTIGACION])
-            ->with('procesal.persona', 'pretension', 'materia',)
-            ->get();
-        $formattedData = [];
-        foreach ($procedings as $proceeding) {
-            $processedProcesals = $this->formatProcesalData($proceeding->procesal);
-            $commonData = [
-                'exp_id' => $proceeding->exp_id,
-                'numero' => $proceeding->exp_numero,
-                'fecha_inicio' => $proceeding->exp_fecha_inicio,
-                'pretencion' => optional($proceeding->pretension)->pre_nombre,
-                'materia' => optional($proceeding->materia)->mat_nombre,
-                'monto_pretencion' => $proceeding->exp_monto_pretencion,
-                'estado_proceso' => ucwords(strtolower($proceeding->exp_estado_proceso)),
-                'multiple' => $proceeding->multiple,
-                'tipo_exp' => $proceeding->type_id,
-                'creacion' => $proceeding->created_at,
-                'procesal' => $processedProcesals,
-                'oficios' => $proceeding->officeProceedings->toArray(),
-            ];
-            $formattedData[] = $commonData;
-        }
+        try {
+            $proceeding = Proceeding::latest()
+                ->with('procesal.persona', 'materia', 'pretension')
+                ->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])
+                ->get();
 
-        return response()->json($formattedData, 200);
+            return response()->json($proceeding, Response::HTTP_OK);
+        } catch (Exception $e) {
+            return response()->json($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function lawyer()
+    {
+        try {
+            $user = Auth::user();
+
+            // Obtener el primer modelo Abogado de la colección, si existe
+            $firstAbogado = $user->abogado->first();
+
+            // Si se encontró un modelo Abogado, asignar abo_id a $abo_id
+            $abo_id = $firstAbogado ? $firstAbogado->abo_id : null;
+
+            if ($user) {
+                $proceeding = Proceeding::latest()
+                    ->where('abo_id', $abo_id)
+                    ->with('procesal.persona', 'materia', 'pretension')
+                    ->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])
+                    ->get();
+
+                if ($proceeding) {
+                    return response()->json($proceeding, Response::HTTP_OK);
+                } else {
+                    return response()->json(['message' => 'No se encontraron resultados'], Response::HTTP_NOT_FOUND);
+                }
+            } else {
+                return response()->json(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+            }
+        } catch (Exception $e) {
+            return response()->json($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     protected function archivados()

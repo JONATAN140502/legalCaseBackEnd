@@ -81,6 +81,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('/delete/list', [ProceedingController::class, 'deletelist'])->name('proceeding.deletelist');
         Route::post('/audiencias', [ProceedingController::class, 'audiencias'])->name('proceeding.audiencias');
         Route::post('/alertas', [ProceedingController::class, 'alertas'])->name('proceeding.alertas');
+        Route::post('/lawyer', [ProceedingController::class, 'lawyer'])->name('proceeding.lawyer');
     });
 
     //  Distritos Judiciales
