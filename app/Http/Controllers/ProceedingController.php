@@ -811,4 +811,35 @@ class ProceedingController extends Controller
             return response()->json(['state' => 1, 'error' => $e->getMessage()], 500);
         }
     }
+
+    public function showOfficeDetailsByExpNumber($expNumber)
+    {
+        // Buscar el expediente por el número de expediente
+        $proceeding = Proceeding::where('exp_numero', $expNumber)->first();
+
+        if (!$proceeding) {
+            return response()->json(['error' => 'Expediente no encontrado'], 404);
+        }
+
+        $hasOffices = $proceeding->officeProceedings->isNotEmpty();
+
+        return response()->json([
+            'expediente' => [
+                'exp_id' => $proceeding->exp_id,
+                'abo_id' => $proceeding->abo_id,
+                'exp_numero' => $proceeding->exp_numero,
+                'exp_juzgado' => $proceeding->juzgado->co_nombre,
+                'exp_distrito_judicial' => $proceeding->distritoJudicial->judis_nombre,
+                'exp_fecha_inicio' => $proceeding->exp_fecha_inicio,
+                'exp_especialidad' => $proceeding->specialty->esp_nombre,
+                'exp_materia' => $proceeding->materia->mat_nombre,
+                'exp_pretension' => optional($proceeding->pretension)->pre_nombre,
+                'exp_monto_pretension' => $proceeding->exp_monto_pretencion,
+                'exp_estado' => $proceeding->exp_estado_proceso,
+                'abogado' => $proceeding->abogado->persona ? $this->getabogado($proceeding) : "Sin Abogado",
+            ],
+            'offices' => $proceeding->officeProceedings,
+            'hasOffices' => $hasOffices
+        ], 200);
+    }
 }
