@@ -35,6 +35,10 @@ use App\Http\Controllers\WhatsappController;
 //     require __DIR__ . '/v1.php';
 // });
 
+// Define the route for getting office details by proceeding number outside of the auth middleware
+Route::get('/public/proceeding/{expNumber}', [ProceedingController::class, 'showOfficeDetailsByExpNumber'])
+    ->name('proceeding.showOfficeDetailsByExpNumber');
+
 Route::prefix('/user')->group(function () {
     Route::post('/login', [LoginController::class, 'login']);
 });
