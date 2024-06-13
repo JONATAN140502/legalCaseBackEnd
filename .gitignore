@@ -17,6 +17,5 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
-/app/Http/Controllers/v1/
-/routes/v1.php
-/routes/api.php
+# /app/Http/Controllers/v2/
+# /routes/v2.php
