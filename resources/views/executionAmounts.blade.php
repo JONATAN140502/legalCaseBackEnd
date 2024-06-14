@@ -3,68 +3,68 @@
 
 <head>
     <meta charset="utf-8">
-    <title>{{ $tipo }}</title>
+    <title>Montos de Ejecucion</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-
         table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th {
+            border-bottom: 0.5px solid #000000;
         }
 
         th,
         td {
-            border-bottom: 1px solid #ddd;
             padding: 8px;
-            text-align: center;
+            text-align: left;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            font-size: 13px;
+        }
+
+        .horizontal {
+            white-space: nowrap;
+        }
+
+        .title {
+            font-weight: bold;
+        }
+
+        .subtitle {
+            font-weight: 500;
+        }
+
+        .date {
             font-size: 12px;
-        }
-
-        th:first-child,
-        td:first-child {
-            border-left: none;
-        }
-
-        th:last-child,
-        td:last-child {
-            border-right: none;
-        }
-
-        tr:last-child td {
-            border-bottom: none;
+            text-align: right !important;
         }
 
         .footer {
-            position: fixed;
+            position: absolute;
             bottom: 0;
-            left: 0;
             width: 100%;
-            background-color: #f2f2f2;
-            text-align: center;
-            padding: 10px 0;
+            text-align: right;
+            padding: 10px;
         }
-
+    </style>
     </style>
 </head>
 
 <body>
-
     <div class="header">
-        <img src="{{ asset('images/log.jpg') }}"
-            style="position: absolute; top: 10px; right: 10px; width: 180px; height: auto; z-index: 9999;" />
-
-        <p>Reporte de Montos en Ejecucion</p>
+        <p class="date">Fecha de impresión:
+            {{ \Carbon\Carbon::now()->setTimezone('America/Lima')->format('d/m/Y H:i:s') }}</p>
+        <img src="{{ asset('images/log.jpg') }}" style="width: 180px; height: auto;" />
+        <h2 class="subtitle">Reporte de Montos en Ejecucion</h2>
     </div>
     <table>
         <thead>
             <tr>
                 <th>#</th>
                 <th>Número</th>
-                <th>Fecha de Inicio</th>
+                <th class="horizontal">Fecha de Inicio</th>
                 <th>Materia</th>
                 <th>Demandante</th>
                 <th>Demandado</th>
@@ -73,48 +73,94 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($proceedings as $proceeding)
+            @foreach ($proceedings as $index => $proceeding)
                 <tr>
-                    <td>{{ $loop->iteration }}</td>
-                    <td>{{ $proceeding->exp_numero }}</td>
-                    <td>{{ $proceeding->exp_fecha_inicio }}</td>
+                    <td>{{ $index + 1 }}</td>
+                    <td class="horizontal">{{ $proceeding->exp_numero }}</td>
+                    <td class="horizontal">{{ $proceeding->exp_fecha_inicio }}</td>
                     <td>{{ $proceeding->materia->mat_nombre }}</td>
                     <td>
-                        @foreach ($proceeding->procesal as $item)
-                            @if ($item->tipo_procesal === 'DEMANDANTE')
-                                @php
-                                    $demandante =
-                                        $item->tipo_persona === 'NATURAL' ? $item->persona->nat_nombres : 'UNPRG';
-                                    if ($item->tipo_persona === 'NATURAL') {
-                                       
+                        @php
+                            $demandante = 'UNPRG';
+                            if ($proceeding->multiple === '0') {
+                                foreach ($proceeding->procesal as $value) {
+                                    if ($value->tipo_procesal === 'DEMANDANTE') {
+                                        $demandante =
+                                            $value->tipo_persona === 'NATURAL'
+                                                ? ucwords(strtolower($value->persona->nat_nombres)) .
+                                                    ' ' .
+                                                    ucwords(strtolower($value->persona->nat_apellido_paterno)) .
+                                                    ' ' .
+                                                    ucwords(strtolower($value->persona->nat_apellido_materno))
+                                                : $value->persona->jur_razon_social;
+                                        break;
                                     }
-                                @endphp
-                                {{ $demandante }}
-                            @endif
-                        @endforeach
+                                }
+                            } else {
+                                $demandante = 'Demanda Colectiva';
+                            }
+                        @endphp
+                        {{ $demandante }}
                     </td>
                     <td>
-                        @foreach ($proceeding->procesal as $item)
-                            @if ($item->tipo_procesal === 'DEMANDADO')
-                                @php
-                                    $demandado =
-                                        $item->tipo_persona === 'NATURAL' ? $item->persona->nat_nombres : 'UNPRG';
-                                @endphp
-                                {{ $demandado }}
-                            @endif
-                        @endforeach
+                        @php
+                            $demandado = 'UNPRG';
+                            if ($proceeding->multiple === '0') {
+                                foreach ($proceeding->procesal as $value) {
+                                    if ($value->tipo_procesal === 'DEMANDADO') {
+                                        $demandado =
+                                            $value->tipo_persona === 'NATURAL'
+                                                ? ucwords(strtolower($value->persona->nat_nombres)) .
+                                                    ' ' .
+                                                    ucwords(strtolower($value->persona->nat_apellido_paterno)) .
+                                                    ' ' .
+                                                    ucwords(strtolower($value->persona->nat_apellido_materno))
+                                                : $value->persona->jur_razon_social;
+                                        break;
+                                    }
+                                }
+                            } else {
+                                $demandado = 'Demanda Colectiva';
+                            }
+                        @endphp
+                        {{ $demandado }}
                     </td>
-                    <td>{{ $proceeding->montos->total_amount_sentence }}</td>
-                    <td>{{ $proceeding->montos->total_balance_payable }}</td>
+                    <td>
+                        @if ($proceeding->montos)
+                            {{ $proceeding->montos->total_amount_sentence ?? '0.00' }}
+                        @else
+                            0.00
+                        @endif
+                    </td>
+                    <td>
+                        @if ($proceeding->montos)
+                            {{ $proceeding->montos->total_balance_payable ?? '0.00' }}
+                        @else
+                            0.00
+                        @endif
+                    </td>
                 </tr>
             @endforeach
         </tbody>
     </table>
-
     <div class="footer">
-        <p>Pie de página - Inserta aquí lo que quieras que aparezca al final de la página</p>
+        @if ($proceedings->isEmpty() || $index === $proceedings->count() - 1)
+            <p>MONTOS TOTALES</p>
+            <p>Monto total fijado en sentencia =
+                @if ($amounts['total_amount_sentence'] != 0)
+                    {{ $amounts['total_amount_sentence'] }}
+                @else
+                    0.00
+                @endif
+            </p>
+            <p>Saldo total por pagar =
+                @if ($amounts['total_balance_payable'] != 0)
+                    {{ $amounts['total_balance_payable'] }}
+                @else
+                    0.00
+                @endif
+        @endif
     </div>
-
 </body>
 
 </html>

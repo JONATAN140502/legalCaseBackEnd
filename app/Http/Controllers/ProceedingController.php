@@ -30,7 +30,7 @@ class ProceedingController extends Controller
     {
         try {
             $proceeding = Proceeding::latest()
-                ->with('procesal.persona', 'materia', 'pretension')
+                ->with('procesal.persona', 'materia', 'pretension', 'costos')
                 ->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])
                 ->get();
 
@@ -369,12 +369,14 @@ class ProceedingController extends Controller
                 $costo = \App\Models\ExecutionAmount::updateOrCreate(
                     ['exp_id' => strtoupper(trim($request->expediente['exp_id']))],
                     [
-                        'ex_ejecucion_1' => $request->expediente['exp_monto_ejecucion1'] != '' ? strtoupper(trim($request->expediente['exp_monto_ejecucion1'])) : null,
-                        'ex_ejecucion_2' => $request->expediente['exp_monto_ejecucion2'] != '' ? strtoupper(trim($request->expediente['exp_monto_ejecucion2'])) : null,
-                        'ex_interes_1'   => $request->expediente['exp_interes1'] != '' ? strtoupper(trim($request->expediente['exp_interes1'])) : null,
-                        'ex_interes_2'   => $request->expediente['exp_interes2'] != '' ? strtoupper(trim($request->expediente['exp_interes2'])) : null,
-                        'ex_costos'      => $request->expediente['exp_costos'] != '' ? strtoupper(trim($request->expediente['exp_costos'])) : null,
-                    ]
+                        // 'ex_ejecucion_1' => $request->expediente['exp_monto_ejecucion1'] != '' ? strtoupper(trim($request->expediente['exp_monto_ejecucion1'])) : null,
+                        // 'ex_ejecucion_2' => $request->expediente['exp_monto_ejecucion2'] != '' ? strtoupper(trim($request->expediente['exp_monto_ejecucion2'])) : null,
+                        // 'ex_interes_1'   => $request->expediente['exp_interes1'] != '' ? strtoupper(trim($request->expediente['exp_interes1'])) : null,
+                        // 'ex_interes_2'   => $request->expediente['exp_interes2'] != '' ? strtoupper(trim($request->expediente['exp_interes2'])) : null,
+                        // 'ex_costos'      => $request->expediente['exp_costos'] != '' ? strtoupper(trim($request->expediente['exp_costos'])) : null,
+                        'total_amount_sentence' => $request->expediente['total_amount_sentence'],
+                        'total_balance_payable' => $request->expediente['total_balance_payable']
+                    ] 
                 );
             }
             //eliminar procesales 
