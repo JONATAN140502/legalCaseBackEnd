@@ -30,7 +30,7 @@ class ProceedingController extends Controller
     {
         try {
             $proceeding = Proceeding::latest()
-                ->with('procesal.persona', 'materia', 'pretension', 'costos')
+                ->with('procesal.persona', 'materia', 'pretension')
                 ->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])
                 ->get();
 
