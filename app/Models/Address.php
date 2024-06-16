@@ -18,20 +18,24 @@ class Address extends Model
         'per_id'
     ];
     protected $dates = ['deleted_at'];
+
     public function district()
     {
         return $this->belongsTo(District::class, 'dis_id', 'dis_id');
     }
 
-    public function provincia() {
+    public function provincia()
+    {
         return $this->belongsTo(Province::class, ' pro_id');
     }
 
-    public function  departamento(){
+    public function  departamento()
+    {
         return $this->belongsTo(Department::class, 'dep_id');
     }
 
-    public function persona(){
-        return $this->belongsTo(Person::class, 'per_id','per_id');
+    public function persona()
+    {
+        return $this->belongsTo(Person::class, 'per_id', 'per_id');
     }
 }

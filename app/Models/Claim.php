@@ -17,8 +17,8 @@ class Claim extends Model
     ];
     protected $dates = ['deleted_at'];
 
-    public function expedientes()
+    public function proceeding()
     {
-        return $this->hasMany(Expediente::class, 'pre_id', 'exp_pretencion');
+        return $this->hasMany(Proceeding::class, 'pre_id', 'exp_pretencion');
     }
 }

@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 use Uuid;
 use  Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class ProceedingController extends Controller
 {
@@ -24,33 +26,49 @@ class ProceedingController extends Controller
     const ARCHIVADO = 'ARCHIVADO';
     const INVESTIGACION = 'EN INVESTIGACION';
 
-    protected function index()
+    public function index()
     {
-        $procedings = Proceeding::latest()
-            ->whereIn('exp_estado_proceso', [self::TRAMITE, self::EJECUCION, self::INVESTIGACION])
-            ->with('procesal.persona', 'pretension', 'materia',)
-            ->get();
-        $formattedData = [];
-        foreach ($procedings as $proceeding) {
-            $processedProcesals = $this->formatProcesalData($proceeding->procesal);
-            $commonData = [
-                'exp_id' => $proceeding->exp_id,
-                'numero' => $proceeding->exp_numero,
-                'fecha_inicio' => $proceeding->exp_fecha_inicio,
-                'pretencion' => optional($proceeding->pretension)->pre_nombre,
-                'materia' => optional($proceeding->materia)->mat_nombre,
-                'monto_pretencion' => $proceeding->exp_monto_pretencion,
-                'estado_proceso' => ucwords(strtolower($proceeding->exp_estado_proceso)),
-                'multiple' => $proceeding->multiple,
-                'tipo_exp' => $proceeding->type_id,
-                'creacion' => $proceeding->created_at,
-                'procesal' => $processedProcesals,
-                'oficios' => $proceeding->officeProceedings->toArray(),
-            ];
-            $formattedData[] = $commonData;
-        }
+        try {
+            $proceeding = Proceeding::latest()
+                ->with('procesal.persona', 'materia', 'pretension')
+                ->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])
+                ->get();
 
-        return response()->json($formattedData, 200);
+            return response()->json($proceeding, Response::HTTP_OK);
+        } catch (Exception $e) {
+            return response()->json($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function lawyer()
+    {
+        try {
+            $user = Auth::user();
+
+            // Obtener el primer modelo Abogado de la colección, si existe
+            $firstAbogado = $user->abogado->first();
+
+            // Si se encontró un modelo Abogado, asignar abo_id a $abo_id
+            $abo_id = $firstAbogado ? $firstAbogado->abo_id : null;
+
+            if ($user) {
+                $proceeding = Proceeding::latest()
+                    ->where('abo_id', $abo_id)
+                    ->with('procesal.persona', 'materia', 'pretension')
+                    ->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])
+                    ->get();
+
+                if ($proceeding) {
+                    return response()->json($proceeding, Response::HTTP_OK);
+                } else {
+                    return response()->json(['message' => 'No se encontraron resultados'], Response::HTTP_NOT_FOUND);
+                }
+            } else {
+                return response()->json(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+            }
+        } catch (Exception $e) {
+            return response()->json($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     protected function archivados()
@@ -351,12 +369,14 @@ class ProceedingController extends Controller
                 $costo = \App\Models\ExecutionAmount::updateOrCreate(
                     ['exp_id' => strtoupper(trim($request->expediente['exp_id']))],
                     [
-                        'ex_ejecucion_1' => $request->expediente['exp_monto_ejecucion1'] != '' ? strtoupper(trim($request->expediente['exp_monto_ejecucion1'])) : null,
-                        'ex_ejecucion_2' => $request->expediente['exp_monto_ejecucion2'] != '' ? strtoupper(trim($request->expediente['exp_monto_ejecucion2'])) : null,
-                        'ex_interes_1'   => $request->expediente['exp_interes1'] != '' ? strtoupper(trim($request->expediente['exp_interes1'])) : null,
-                        'ex_interes_2'   => $request->expediente['exp_interes2'] != '' ? strtoupper(trim($request->expediente['exp_interes2'])) : null,
-                        'ex_costos'      => $request->expediente['exp_costos'] != '' ? strtoupper(trim($request->expediente['exp_costos'])) : null,
-                    ]
+                        // 'ex_ejecucion_1' => $request->expediente['exp_monto_ejecucion1'] != '' ? strtoupper(trim($request->expediente['exp_monto_ejecucion1'])) : null,
+                        // 'ex_ejecucion_2' => $request->expediente['exp_monto_ejecucion2'] != '' ? strtoupper(trim($request->expediente['exp_monto_ejecucion2'])) : null,
+                        // 'ex_interes_1'   => $request->expediente['exp_interes1'] != '' ? strtoupper(trim($request->expediente['exp_interes1'])) : null,
+                        // 'ex_interes_2'   => $request->expediente['exp_interes2'] != '' ? strtoupper(trim($request->expediente['exp_interes2'])) : null,
+                        // 'ex_costos'      => $request->expediente['exp_costos'] != '' ? strtoupper(trim($request->expediente['exp_costos'])) : null,
+                        'total_amount_sentence' => $request->expediente['total_amount_sentence'],
+                        'total_balance_payable' => $request->expediente['total_balance_payable']
+                    ] 
                 );
             }
             //eliminar procesales 
@@ -453,17 +473,17 @@ class ProceedingController extends Controller
         $dataEscritos = null;
 
         $dataGeneral = [
-            'exp_id' => $proceeding->exp_id,
-            'abo_id' => $proceeding->abo_id,
-            'exp_numero' => $proceeding->exp_numero,
-            'exp_juzgado' => $proceeding->juzgado->co_nombre,
-            'exp_distrito_judicial' => $proceeding->distritoJudicial->judis_nombre,
-            'exp_fecha_inicio' => $proceeding->exp_fecha_inicio,
-            'exp_especialidad' => $proceeding->specialty->esp_nombre,
-            'exp_materia' => $proceeding->materia->mat_nombre,
-            'exp_pretension' => optional($proceeding->pretension)->pre_nombre,
-            'exp_monto_pretension' => $proceeding->exp_monto_pretencion,
-            'exp_estado' => $proceeding->exp_estado_proceso,
+            'exp_id' => $proceeding->exp_id ?? "",
+            'abo_id' => $proceeding->abo_id ?? "",
+            'exp_numero' => $proceeding->exp_numero ?? "",
+            'exp_juzgado' => $proceeding->juzgado->co_nombre ?? "",
+            'exp_distrito_judicial' => $proceeding->distritoJudicial->judis_nombre ?? "",
+            'exp_fecha_inicio' => $proceeding->exp_fecha_inicio ?? "",
+            'exp_especialidad' => $proceeding->specialty->esp_nombre ?? "",
+            'exp_materia' => $proceeding->materia->mat_nombre ?? "",
+            'exp_pretension' => optional($proceeding->pretension)->pre_nombre ?? "",
+            'exp_monto_pretension' => $proceeding->exp_monto_pretencion ?? "",
+            'exp_estado' => $proceeding->exp_estado_proceso ?? "",
             'abogado' => $proceeding->abogado->persona ? $this->getabogado($proceeding) : "Sin Abogado",
         ];
 
@@ -509,28 +529,28 @@ class ProceedingController extends Controller
         $proceeding1 = \App\Models\Proceeding::with('procesal.persona.address')->find($id);
         $processedProcesalData = $proceeding1->procesal->map(function ($proc) {
             return [
-                'proc_id' => $proc->proc_id,
-                "tipo_procesal" => $proc->tipo_procesal,
-                "tipo_persona" => $proc->tipo_persona,
-                "per_id" => $proc->per_id,
-                "exp_id" => $proc->exp_id,
+                'proc_id' => $proc->proc_id ?? "",
+                "tipo_procesal" => $proc->tipo_procesal ?? "",
+                "tipo_persona" => $proc->tipo_persona ?? "",
+                "per_id" => $proc->per_id ?? "",
+                "exp_id" => $proc->exp_id ?? "",
                 'nat_dni' => $proc->persona->nat_dni,
-                'nat_apellido_paterno' => ucwords(strtolower($proc->persona->nat_apellido_paterno)),
-                "nat_apellido_materno" => ucwords(strtolower($proc->persona->nat_apellido_materno)),
-                "nat_nombres" => ucwords(strtolower($proc->persona->nat_nombres)),
-                "nat_telefono" => $proc->persona->nat_telefono,
-                "nat_correo" => $proc->persona->nat_correo,
-                "jur_ruc" => $proc->persona->jur_ruc,
-                "jur_razon_social" => ucwords(strtolower($proc->persona->jur_razon_social)),
-                "jur_telefono" => $proc->persona->jur_telefono,
-                "jur_correo" => $proc->persona->jur_correo,
-                "jur_rep_legal" => $proc->persona->jur_rep_legal,
-                "per_condicion" => $proc->persona->per_condicion,
-                'dir_id' => $proc->persona->address[0]->dir_id,
-                'dir_calle_av' => $proc->persona->address[0]->dir_calle_av,
-                "dis_id" => $proc->persona->address[0]->dis_id,
-                "pro_id" => $proc->persona->address[0]->pro_id,
-                "dep_id" => $proc->persona->address[0]->dep_id,
+                'nat_apellido_paterno' => ucwords(strtolower($proc->persona->nat_apellido_paterno)) ?? "",
+                "nat_apellido_materno" => ucwords(strtolower($proc->persona->nat_apellido_materno)) ?? "",
+                "nat_nombres" => ucwords(strtolower($proc->persona->nat_nombres)) ?? "",
+                "nat_telefono" => $proc->persona->nat_telefono ?? "",
+                "nat_correo" => $proc->persona->nat_correo ?? "",
+                "jur_ruc" => $proc->persona->jur_ruc ?? "",
+                "jur_razon_social" => ucwords(strtolower($proc->persona->jur_razon_social)) ?? "",
+                "jur_telefono" => $proc->persona->jur_telefono ?? "",
+                "jur_correo" => $proc->persona->jur_correo ?? "",
+                "jur_rep_legal" => $proc->persona->jur_rep_legal ?? "",
+                "per_condicion" => $proc->persona->per_condicion ?? "",
+                'dir_id' => $proc->persona->address[0]->dir_id ?? "",
+                'dir_calle_av' => $proc->persona->address[0]->dir_calle_av ?? "",
+                "dis_id" => $proc->persona->address[0]->dis_id ?? "",
+                "pro_id" => $proc->persona->address[0]->pro_id ?? "",
+                "dep_id" => $proc->persona->address[0]->dep_id ?? "",
             ];
         });
         $costos = \App\Models\ExecutionAmount::where('exp_id', $proceeding->exp_id)
@@ -793,5 +813,36 @@ class ProceedingController extends Controller
         } catch (Exception $e) {
             return response()->json(['state' => 1, 'error' => $e->getMessage()], 500);
         }
+    }
+
+    public function showOfficeDetailsByExpNumber($expNumber)
+    {
+        // Buscar el expediente por el número de expediente
+        $proceeding = Proceeding::where('exp_numero', $expNumber)->first();
+
+        if (!$proceeding) {
+            return response()->json(['error' => 'Expediente no encontrado'], 404);
+        }
+
+        $hasOffices = $proceeding->officeProceedings->isNotEmpty();
+
+        return response()->json([
+            'expediente' => [
+                'exp_id' => $proceeding->exp_id,
+                'abo_id' => $proceeding->abo_id,
+                'exp_numero' => $proceeding->exp_numero,
+                'exp_juzgado' => $proceeding->juzgado->co_nombre,
+                'exp_distrito_judicial' => $proceeding->distritoJudicial->judis_nombre,
+                'exp_fecha_inicio' => $proceeding->exp_fecha_inicio,
+                'exp_especialidad' => $proceeding->specialty->esp_nombre,
+                'exp_materia' => $proceeding->materia->mat_nombre,
+                'exp_pretension' => optional($proceeding->pretension)->pre_nombre,
+                'exp_monto_pretension' => $proceeding->exp_monto_pretencion,
+                'exp_estado' => $proceeding->exp_estado_proceso,
+                'abogado' => $proceeding->abogado->persona ? $this->getabogado($proceeding) : "Sin Abogado",
+            ],
+            'offices' => $proceeding->officeProceedings,
+            'hasOffices' => $hasOffices
+        ], 200);
     }
 }

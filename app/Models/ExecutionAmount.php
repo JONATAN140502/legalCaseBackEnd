@@ -18,6 +18,8 @@ class ExecutionAmount extends Model
         'ex_interes_2',
         'ex_costos',
         'exp_id',
+        'total_amount_sentence',
+        'total_balance_payable'
     ];
     protected $dates = ['created_at', 'updated_at', 'deleted_at'];
    

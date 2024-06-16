@@ -12,8 +12,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class User extends Authenticatable
 
 {
-    use HasApiTokens,HasFactory, Notifiable,SoftDeletes;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
+    protected $primaryKey = 'id';
     /**
      * The attributes that are mass assignable.
      *
@@ -32,7 +33,7 @@ class User extends Authenticatable
      *
      * @var array
      */
-    
+
     protected $hidden = [
         'password',
         'remember_token',
@@ -55,8 +56,14 @@ class User extends Authenticatable
         return $this->hasMany(Lawyer::class, 'per_id', 'per_id');
     }
 
-    public function assistant(){
+    public function assistant()
+    {
         return $this->hasOne(Assistant::class, 'per_id', 'per_id');
     }
 
+    //v1
+    public function person()
+    {
+        return $this->belongsTo(Person::class, 'per_id', 'per_id');
+    }
 }

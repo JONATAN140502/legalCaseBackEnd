@@ -10,7 +10,10 @@ use Illuminate\Support\Collection;
 use App\Http\Resources\{
     LawyerResource
 };
+use App\Models\Alert;
+use App\Models\Audience;
 use App\Models\Audit;
+use App\Models\Proceeding;
 
 class ReportController extends Controller
 {
@@ -23,31 +26,35 @@ class ReportController extends Controller
     }
     protected function inicioAdmin(Request $request)
     {
-        $exp = Audit::orderBy('created_at', 'DESC')
-            ->with(['user' => function ($query) {
-                $query->withTrashed();
-            }, 'exp'])
+        $audit = Audit::with(['user' => function ($query) {
+            $query->withTrashed();
+        }, 'exp'])
+            ->latest()
+            ->take(6)
             ->get();
-        $today = date("Y-m-d");  //hoy
-        $expTotal = \App\Models\Proceeding::whereIn(
-            'exp_estado_proceso',
-            [
-                'EN TRAMITE',
-                'EN EJECUCION'
-            ]
-        )->count();
+        $proceeding = Proceeding::latest()->take(6)->get();
 
-        $alerts = \App\Models\Alert::where('ale_fecha_vencimiento', '>=', $today)
-            ->count();
-        $audiences = \App\Models\Audience::where('au_fecha', '>=', $today)
-            ->count();
-        $combinedData = [
-            'expTotal' => $expTotal,
-            'alerts' => $alerts,
-            'audiences' => $audiences
-        ];
+        // Obtener la fecha de hoy
+        $today = now()->format('Y-m-d');
+
+        // Contar el total de expedientes en trámite o en ejecución
+        $expTotal = Proceeding::whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])->count();
+
+        // Contar las alertas con fecha de vencimiento mayor o igual a la fecha de hoy
+        $alerts = Alert::where('ale_fecha_vencimiento', '>=', $today)->count();
+
+        // Contar las audiencias con fecha mayor o igual a la fecha de hoy
+        $audiences = Audience::where('au_fecha', '>=', $today)->count();
+
+        // Crear el arreglo combinado de datos
+        $combinedData = compact('expTotal', 'alerts', 'audiences');
+
+        // Devolver una respuesta JSON con el estado, los datos de auditoría, y los datos combinados
         return response()->json([
-            'state' => 0, 'data' => $exp, 'count' => $combinedData
+            'state' => 0, // Supongo que 0 indica un estado correcto, ajusta según necesites
+            'audit' => $audit,
+            'count' => $combinedData,
+            'proceeding' => $proceeding
         ], 200);
     }
 
@@ -57,6 +64,7 @@ class ReportController extends Controller
         $proceedings = \App\Models\Proceeding::orderBy('created_at', 'DESC')
             ->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])
             ->with('person.juridica', 'person.persona')
+
             ->take(5)
             ->get();
 
@@ -179,6 +187,7 @@ class ReportController extends Controller
         $proceedings = \App\Models\Proceeding::orderBy('created_at', 'DESC')
             ->where('exp_estado_proceso', 'EN TRAMITE')
             ->with('procesal.persona', 'pretension', 'materia', 'specialty')
+            ->where('type_id',1)
             ->get();
 
         $formattedData = [];
@@ -198,7 +207,7 @@ class ReportController extends Controller
             ];
             $formattedData[] = $commonData;
         }
-        $tipo = ' Reporte de Expedientes  en Trámite';
+        $tipo = ' Reporte de Expedientes Civil/Laboral en Trámite';
         $totalRegistros = count($formattedData);
         $quinto = ceil($totalRegistros / 5);
         $data1 = array_slice($formattedData, 0, $quinto);
@@ -227,6 +236,7 @@ class ReportController extends Controller
         $proceedings = \App\Models\Proceeding::orderBy('created_at', 'DESC')
             ->where('exp_estado_proceso', 'ARCHIVADO')
             ->with('procesal.persona', 'pretension', 'materia', 'specialty')
+            ->where('type_id',1)
             ->get();
 
         $formattedData = [];
@@ -246,7 +256,7 @@ class ReportController extends Controller
             ];
             $formattedData[] = $commonData;
         }
-        $tipo = ' Reporte de Expedientes Archivados';
+        $tipo = ' Reporte de Expedientes Civil/Laboral Archivados';
         $totalRegistros = count($formattedData);
         $quinto = ceil($totalRegistros / 5);
         $data1 = array_slice($formattedData, 0, $quinto);
@@ -275,6 +285,7 @@ class ReportController extends Controller
         $proceedings = \App\Models\Proceeding::orderBy('created_at', 'DESC')
             ->where('exp_estado_proceso', 'EN EJECUCION')
             ->with('procesal.persona', 'pretension', 'materia', 'specialty')
+            ->where('type_id',1)
             ->get();
 
         $formattedData = [];
@@ -294,7 +305,7 @@ class ReportController extends Controller
             ];
             $formattedData[] = $commonData;
         }
-        $tipo = "Reporte de Expedientes en Ejecución";
+        $tipo = "Reporte de Expedientes  Civil/Laboral en Ejecución";
 
         $totalRegistros = count($formattedData);
         $quinto = ceil($totalRegistros / 5);
@@ -326,6 +337,7 @@ class ReportController extends Controller
                 'exp_estado_proceso',
                 ['EN TRAMITE', 'EN EJECUCION']
             )
+            ->where('type_id',1)
             ->get();
 
         $formattedData = [];
@@ -345,7 +357,7 @@ class ReportController extends Controller
             ];
             $formattedData[] = $commonData;
         }
-        $tipo = "Reporte del Total de Expedientes";
+        $tipo = "Reporte del Total de Expedientes  Civil/Laboral";
         $totalRegistros = count($formattedData);
         $quinto = ceil($totalRegistros / 5);
         $data1 = array_slice($formattedData, 0, $quinto);
@@ -385,6 +397,7 @@ class ReportController extends Controller
         $proceedings = \App\Models\Proceeding::orderBy('created_at', 'DESC')
             ->where('exp_fecha_inicio', 'LIKE', $fechaBuscada . '%')
             ->with('procesal.persona', 'pretension', 'materia', 'specialty')
+            ->where('type_id',1)
             ->get();
 
         $formattedData = [];
@@ -404,7 +417,7 @@ class ReportController extends Controller
             ];
             $formattedData[] = $commonData;
         }
-        $tipo = "Reporte del  de Expedientes de Mes y Año";
+        $tipo = "Reporte del  de Expedientes  Civil/Laboral de Mes y Año";
         $totalRegistros = count($formattedData);
         $quinto = ceil($totalRegistros / 5);
         $data1 = array_slice($formattedData, 0, $quinto);
@@ -434,6 +447,7 @@ class ReportController extends Controller
             ->where('exp_materia', $request->exp_materia)
             ->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])
             ->with('procesal.persona', 'pretension', 'materia', 'specialty')
+            ->where('type_id',1)
             ->get();
         $formattedData = [];
         foreach ($proceedings as $proceeding) {
@@ -453,7 +467,7 @@ class ReportController extends Controller
             $formattedData[] = $commonData;
         }
         $materia = \App\Models\Subject::find($request->exp_materia);
-        $tipo = "Reporte de Expedientes por Materia:" . $materia->mat_nombre;
+        $tipo = "Reporte de Expedientes   Civil/Laboral por Materia:" . $materia->mat_nombre;
         $totalRegistros = count($formattedData);
         $quinto = ceil($totalRegistros / 5);
         $data1 = array_slice($formattedData, 0, $quinto);
@@ -485,6 +499,7 @@ class ReportController extends Controller
             ->where('abo_id', $request->abo_id)
             ->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])
             ->with('procesal.persona', 'pretension', 'materia', 'specialty')
+            ->where('type_id',1)
             ->get();
         $formattedData = [];
         foreach ($proceedings as $proceeding) {
@@ -503,7 +518,7 @@ class ReportController extends Controller
             ];
             $formattedData[] = $commonData;
         }
-        $tipo = 'Expedientes a cargo de:' . $abogado->persona->nat_nombres . '
+        $tipo = 'Expedientes  Civil/Laboral a cargo de:' . $abogado->persona->nat_nombres . '
             ' . $abogado->persona->nat_apellido_paterno . ' ' . $abogado->persona->nat_apellido_materno;
         $totalRegistros = count($formattedData);
         $quinto = ceil($totalRegistros / 5);
@@ -537,6 +552,7 @@ class ReportController extends Controller
             ->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])
             ->with('montos')
             ->with('procesal.persona', 'pretension', 'materia', 'specialty')
+            ->where('type_id',1)
             ->get();
         $formattedData = [];
         foreach ($proceedings as $proceeding) {
@@ -565,7 +581,7 @@ class ReportController extends Controller
             }
             $formattedData[] = $commonData;
         }
-        $tipo = "Total de Pretensiones en Demanda";
+        $tipo = "Total de Pretensiones en Demanda  Civil/Laboral";
         return \PDF::loadView('pdfpretensiones', compact('formattedData', 'tipo'))
             ->download();
     }
@@ -587,6 +603,7 @@ class ReportController extends Controller
             ->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])
             ->with('montos')
             ->with('procesal.persona', 'pretension', 'materia', 'specialty')
+            ->where('type_id',1)
             ->get();
         $formattedData = [];
         foreach ($proceedings as $proceeding) {
@@ -615,7 +632,7 @@ class ReportController extends Controller
             }
             $formattedData[] = $commonData;
         }
-        $tipo = "Total de Pretensiones a Pagar ";
+        $tipo = "Total de Pretensiones a Pagar Civil/Laboral";
 
         return \PDF::loadView('pdfejecuciones', compact('formattedData', 'tipo'))
             ->download();
@@ -638,6 +655,7 @@ class ReportController extends Controller
         $proceedings = \App\Models\Proceeding::orderBy('created_at', 'DESC')
             ->where('exp_pretencion', $request->exp_pretension)
             ->with('procesal.persona', 'pretension', 'materia', 'specialty')
+            ->where('type_id',1)
             ->get();
         $formattedData = [];
         foreach ($proceedings as $proceeding) {
@@ -657,7 +675,7 @@ class ReportController extends Controller
             $formattedData[] = $commonData;
         }
         $pre = \App\Models\Claim::find($request->exp_pretension);
-        $tipo = "Reporte de Expedientes por Pretensión:" . $pre->pre_nombre;
+        $tipo = "Reporte de Expedientes  Civil/Laboral por Pretensión:" . $pre->pre_nombre;
         $totalRegistros = count($formattedData);
         $quinto = ceil($totalRegistros / 5);
         $data1 = array_slice($formattedData, 0, $quinto);
@@ -686,6 +704,7 @@ class ReportController extends Controller
         $proceedings = \App\Models\Proceeding::orderBy('created_at', 'DESC')
             ->whereBetween('exp_fecha_inicio', [$request->fechaDesde, $request->fechaHasta])
             ->with('procesal.persona', 'pretension', 'materia', 'specialty')
+            ->where('type_id',1)
             ->get();
         $formattedData = [];
         foreach ($proceedings as $proceeding) {
@@ -705,7 +724,7 @@ class ReportController extends Controller
             ];
             $formattedData[] = $commonData;
         }
-        $tipo = "Reporte de Expedientes del:" . date('d-m-Y', strtotime($request->fechaDesde)) . ' al 
+        $tipo = "Reporte de Expedientes   Civil/Laboral del:" . date('d-m-Y', strtotime($request->fechaDesde)) . ' al 
             ' . date('d-m-Y', strtotime($request->fechaHasta));
         $totalRegistros = count($formattedData);
         $quinto = ceil($totalRegistros / 5);
@@ -821,6 +840,7 @@ class ReportController extends Controller
         $data = \App\Models\Proceeding::selectRaw('YEAR(exp_fecha_inicio) as year, COUNT(*) as cantidad')
             ->groupBy(DB::raw('YEAR(exp_fecha_inicio)'))
             ->orderBy(DB::raw('YEAR(exp_fecha_inicio)'))
+            ->where('type_id',1)
             ->get();
         //  return response()->json(['state' => 0, 'data' => $data], 200);
 
@@ -843,6 +863,7 @@ class ReportController extends Controller
         $data1 = \App\Models\Proceeding::selectRaw('abo_id, COUNT(*) as cantidad')
             ->groupBy('abo_id')
             ->whereIn('exp_estado_proceso', ['EN TRAMITE', 'EN EJECUCION'])
+            ->where('type_id',1)
             ->get();
         $data = $data1->map(function ($abo) {
             $abogado = \App\Models\Lawyer::find($abo->abo_id);

@@ -8,14 +8,20 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Department extends Model
 {
-    use HasFactory,SoftDeletes;
+    use HasFactory, SoftDeletes;
     protected $primaryKey = 'dep_id';
     protected $fillable = [
         'dep_nombre',
     ];
     protected $dates = ['deleted_at'];
 
-    public function direccion(){
+    public function direccion()
+    {
         return $this->hasMany(Address::class, 'dep_id');
+    }
+
+    public function provincia()
+    {
+        return $this->hasMany(Province::class, 'dep_id');
     }
 }

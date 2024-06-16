@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Lawyer extends Model
 {
-    use HasFactory,SoftDeletes;
+    use HasFactory, SoftDeletes;
     protected $primaryKey = 'abo_id';
     protected $fillable = [
         'abo_carga_laboral',
@@ -17,14 +17,19 @@ class Lawyer extends Model
     ];
     protected $dates = ['deleted_at'];
 
-    
+
     public function persona()
     {
         return $this->belongsTo(Person::class, 'per_id', 'per_id');
     }
 
-    public function trades(){
+    public function trades()
+    {
         return $this->hasMany(Trade::class, 'tra_abo_id', 'abo_id');
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'per_id');
+    }
 }
