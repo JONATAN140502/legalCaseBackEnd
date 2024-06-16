@@ -191,6 +191,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::post('/guardar', [ArchivosController::class, 'guardar'])->name('archivos.guardar');
         Route::post('/actualizar/eje', [ArchivosController::class, 'actualizarEje'])->name('archivos.actualizarEje');
         Route::post('/guardarArchivoAdm', [ArchivosController::class, 'guardarArchivoAdm'])->name('archivos.guardarArchivoAdm');
+        Route::post('/actualizarArchivoAdm', [ArchivosController::class, 'actualizarArchivoAdm'])->name('archivos.actualizarArchivoAdm');
     });
 
     Route::prefix('excel')->group(function () {
@@ -285,9 +286,12 @@ Route::middleware(['auth:api'])->group(function () {
 
     //Report
     Route::prefix('report')->group(function () {
+        Route::get('/', 'App\Http\Controllers\TradeReportController@index')->name('report.index');
         Route::post('/create', [TradeReportController::class, 'create'])->name('report.index');
+        Route::post('/createExpLeg', [TradeReportController::class, 'createExpLeg'])->name('report.createExpLeg');
         Route::get('/getNextRepNumber', [TradeReportController::class, 'getNextRepNumber'])->name('report.getNextRepNumber');
-        Route::post('/numInfoNumber', [TradeReportController::class, 'getNumInfoNumber'])->name('report.getNumInfoNumber');
+        Route::get('/numInfoNumber/{abo}', [TradeReportController::class, 'getNumInfoNumber'])->name('report.getNumInfoNumber');
+        Route::put('/update', 'App\Http\Controllers\TradeReportController@update')->name('report.update');
     });
 
     //Oficios de expediente

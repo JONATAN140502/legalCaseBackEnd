@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\TradeReport;
 
 class Proceeding extends Model
 {
@@ -84,5 +85,10 @@ class Proceeding extends Model
     public function officeProceedings()
     {
     return $this->hasMany(OfficeProceeding::class, 'expediente_id', 'exp_id');
+    }
+
+    public function reports()
+    {
+        return $this->hasMany(TradeReport::class, 'rep_exp_id', 'exp_id');
     }
 }

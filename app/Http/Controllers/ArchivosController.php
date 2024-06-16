@@ -76,6 +76,48 @@ class ArchivosController extends Controller
         }
     }
 
+    public function actualizarArchivoAdm(Request $request)
+    {
+        try {
+            // Elimina el archivo existente
+            Storage::disk('public_server')->delete($request->ruta);
+
+            // Verificación de la existencia del archivo
+            $directorio = $request->doc_tipo;
+            $file = $request->file('file');
+            $number = $request->number;
+            
+            $extension = $file->getClientOriginalExtension();
+            
+            // Ruta del archivo
+            $doc_file = "{$directorio}/{$number}.{$extension}";
+
+            // Almacena el archivo en el disco 'public'
+            Storage::disk('public_server')->put($doc_file, file_get_contents($file));
+
+
+            $trade_report = TradeReport::findOrFail($request->id);
+            if($directorio === 'INFORMES'){
+                $trade_report->update([
+                    'rep_pdf_informe' => $doc_file
+                ]);
+            }else if($directorio === 'OFICIOS'){
+                $trade_report->update([
+                    'rep_pdf_oficio' => $doc_file
+                ]);
+            }
+            $updatedData = TradeReport::find($trade_report->rep_id);
+
+            return response()->json([
+                'mensaje' => "Archivo actualizado correctamente",
+                'data' => $updatedData
+            ]);
+        } catch (\Exception $e) {
+            // Manejo de errores
+            return response()->json(['error' => 'Error al actualizar el archivo: ' . $e->getMessage()], 500);
+        }
+    }
+
     public function guardar(Request $request)
     {
         try {

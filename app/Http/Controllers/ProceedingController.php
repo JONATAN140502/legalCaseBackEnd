@@ -492,12 +492,13 @@ class ProceedingController extends Controller
                 'user_id' => \Auth::user()->id,
             ]);
         }
+        $proceeding->load('reports.area');
         return response()->json([
             'expediente' => $dataGeneral,
             'procesales' => $dataProcesal,
             'eje' => $dataEje,
             'escritos' => $dataEscritos,
-            'office' => $proceeding->officeProceedings
+            'office' => $proceeding->reports
         ], 200);
     }
 
